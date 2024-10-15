@@ -52,6 +52,7 @@ class HomeFragment : Fragment() {
         )
     }
 
+    // Function to add a task view to the layout
     private fun addTasksToLayout(parentLayout: ConstraintLayout, tasks: List<Task>, inflater: LayoutInflater) {
         var previousViewId: Int? = null // Initialize the ID of the previous view to null
 
