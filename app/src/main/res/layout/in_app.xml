@@ -15,7 +15,7 @@
         android:paddingLeft="8dp"
         android:paddingTop="16dp"
         android:paddingRight="8dp"
-        android:paddingBottom="100dp" />
+        android:paddingBottom="90dp" />
 
     <!-- Bottom Navigation View -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
