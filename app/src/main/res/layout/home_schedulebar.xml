@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:padding="16dp"
+    android:background="@drawable/curved_background">
+
+    <!-- Icon on the left -->
+    <ImageView
+        android:id="@+id/task_icon"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:src="@android:drawable/btn_star_big_off"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <!-- Main Text (e.g., Task Name) -->
+    <TextView
+        android:id="@+id/task_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:text="Bath"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@id/task_time"
+        app:layout_constraintStart_toEndOf="@id/task_icon"
+        app:layout_constraintTop_toTopOf="@id/task_icon" />
+
+    <!-- Time Text -->
+    <TextView
+        android:id="@+id/task_time"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:text="9:45 AM"
+        android:textColor="#808080"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="@id/task_icon"
+        app:layout_constraintStart_toEndOf="@id/task_icon"
+        app:layout_constraintTop_toBottomOf="@id/task_title" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
