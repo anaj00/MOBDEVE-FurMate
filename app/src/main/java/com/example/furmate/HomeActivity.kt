@@ -51,6 +51,22 @@ class HomeActivity : AppCompatActivity() {
 
         // Handle FAB click to toggle menu
         handleFABClick()
+
+        // Handle click on Add Schedule
+        scheduleFAB.setOnClickListener {
+            openFormSchedule(isSchedule = true)
+        }
+
+        // Handle click on Add Record
+        recordFAB.setOnClickListener {
+            openFormSchedule(isSchedule = false)
+        }
+    }
+
+    private fun openFormSchedule(isSchedule: Boolean) {
+        // Load form_schedule fragment and hide FABs
+        hideFABs()
+        loadFragment(FormScheduleFragment(isSchedule))
     }
 
     // Function to handle FAB click
@@ -60,7 +76,12 @@ class HomeActivity : AppCompatActivity() {
         }
     }
 
-    // Function to toggle FAB menu
+    private fun hideFABs() {
+        mainFAB.visibility = View.GONE
+        scheduleFAB.visibility = View.GONE
+        recordFAB.visibility = View.GONE
+    }
+
     private fun toggleFABMenu() {
         if (isFabMenuOpen) {
             closeFabMenu()
@@ -69,62 +90,60 @@ class HomeActivity : AppCompatActivity() {
         }
     }
 
-    // Function to open FAB menu
     private fun openFabMenu() {
-        // Use MaterialFadeThrough for a smooth transition
-        val fadeThrough = MaterialFadeThrough().apply {
-            duration = 300
-        }
-
-        // Begin transition using TransitionManager
+        val fadeThrough = MaterialFadeThrough().apply { duration = 300 }
         TransitionManager.beginDelayedTransition(findViewById(R.id.home_coord), fadeThrough)
-
-        // Show the smaller FABs
         scheduleFAB.visibility = View.VISIBLE
         recordFAB.visibility = View.VISIBLE
-
         isFabMenuOpen = true
     }
 
-    // Function to close FAB menu
     private fun closeFabMenu() {
-        // Use MaterialFadeThrough for a smooth transition
-        val fadeThrough = MaterialFadeThrough().apply {
-            duration = 300
-        }
-
-        // Begin transition using TransitionManager
+        val fadeThrough = MaterialFadeThrough().apply { duration = 300 }
         TransitionManager.beginDelayedTransition(findViewById(R.id.home_coord), fadeThrough)
-
-        // Hide the smaller FABs
         scheduleFAB.visibility = View.GONE
         recordFAB.visibility = View.GONE
-
         isFabMenuOpen = false
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        // If the FAB menu is open and the user touches outside the FAB, close the menu
         if (isFabMenuOpen && event.action == MotionEvent.ACTION_DOWN) {
             val fabRect = Rect()
             val fab = findViewById<FloatingActionButton>(R.id.add_fab)
-
-            // Get the visible bounds of the main FAB
             fab.getGlobalVisibleRect(fabRect)
 
-            // Check if the touch event is outside the FAB's visible bounds
             if (!fabRect.contains(event.rawX.toInt(), event.rawY.toInt())) {
-                closeFabMenu() // Close the FAB menu if touched outside
+                closeFabMenu()
             }
         }
         return super.onTouchEvent(event)
     }
 
-
     // Function to load a fragment
     private fun loadFragment(fragment: Fragment) {
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragment_container, fragment)
+            .addToBackStack(null)
             .commit()
+    }
+
+    // Override onBackPressed to handle FAB visibility
+    override fun onBackPressed() {
+        // Get the current fragment
+        val currentFragment = supportFragmentManager.findFragmentById(R.id.fragment_container)
+
+        // If we are in FormScheduleFragment, show the FABs again
+        if (currentFragment is FormScheduleFragment) {
+            showFABs()
+        }
+
+        // Call the default onBackPressed behavior to pop the fragment back stack
+        super.onBackPressed()
+    }
+
+    private fun showFABs() {
+        mainFAB.visibility = View.VISIBLE
+        scheduleFAB.visibility = View.GONE // Keep these hidden until the main FAB is clicked again
+        recordFAB.visibility = View.GONE
     }
 }
