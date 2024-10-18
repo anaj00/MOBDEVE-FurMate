@@ -1,4 +1,3 @@
-import android.animation.ObjectAnimator
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -6,12 +5,13 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
-import androidx.core.animation.doOnEnd
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.furmate.R
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-
-data class Task(val name: String, val time: String) // Data class representing each task
+import com.example.furmate.models.Task
+import com.example.furmate.adapter.TaskAdapter
+import com.example.furmate.utils.MarginItemDecoration
 
 class HomeFragment : Fragment() {
 
@@ -19,44 +19,25 @@ class HomeFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val rootView = inflater.inflate(R.layout.fragment_home, container, false) // Inflate the fragment layout
+        val rootView = inflater.inflate(R.layout.screen_home, container, false)
 
-        // Retrieving and displaying tasks for today pane
-        val todays_tasks = getSampleTasks() // Sample list of tasks, normally you would retrieve this from your database
-        val today_content_pane = rootView.findViewById<ConstraintLayout>(R.id.today_content)
-        addTasksToLayout(today_content_pane, todays_tasks, inflater)
+        // Set up RecyclerView for "Today" pane
+        val todayRecyclerView = rootView.findViewById<RecyclerView>(R.id.today_recycler_view)
+        val todayTasks = getSampleTasks()
+        todayRecyclerView.layoutManager = LinearLayoutManager(context)
+        todayRecyclerView.adapter = TaskAdapter(todayTasks)
+        todayRecyclerView.addItemDecoration(MarginItemDecoration(16))
 
-        // Retrieving and displaying tasks for upcoming pane
-        val upcoming_tasks = getSampleTasks() // Sample list of tasks, normally you would retrieve this from your database
-        val upcoming_content_pane = rootView.findViewById<ConstraintLayout>(R.id.upcoming_content)
-        addTasksToLayout(upcoming_content_pane, upcoming_tasks, inflater)
+        // Set up RecyclerView for "Upcoming" pane
+        val upcomingRecyclerView = rootView.findViewById<RecyclerView>(R.id.upcoming_recycler_view)
+        val upcomingTasks = getSampleTasks()
+        upcomingRecyclerView.layoutManager = LinearLayoutManager(context)
+        upcomingRecyclerView.adapter = TaskAdapter(upcomingTasks)
+        upcomingRecyclerView.addItemDecoration(MarginItemDecoration(16))
 
-        handleFAB(rootView)
         return rootView
     }
 
-    //
-    private fun handleFAB(rootView: View) {
-        val fab: FloatingActionButton = rootView.findViewById(R.id.add_schedule)
-        val formLayout: View = rootView.findViewById(R.id.form_layout)
-
-        fab.setOnClickListener {
-            if (formLayout.visibility == View.GONE) {
-                formLayout.visibility = View.VISIBLE
-                val animator = ObjectAnimator.ofFloat(formLayout, "translationY", 1000f, 0f)
-                animator.duration = 500
-                animator.start()
-            } else {
-                val animator = ObjectAnimator.ofFloat(formLayout, "translationY", 0f, 1000f)
-                animator.duration = 500
-                animator.start()
-                animator.doOnEnd {
-                    formLayout.visibility = View.GONE
-                }
-            }
-        }
-
-    }
 
     // Function to get a list of sample tasks
     private fun getSampleTasks(): List<Task> {
@@ -93,7 +74,7 @@ class HomeFragment : Fragment() {
 
     // Function to inflate the reusable task view
     private fun inflateTaskView(inflater: LayoutInflater, parent: ViewGroup): View {
-        return inflater.inflate(R.layout.home_schedulebar, parent, false).apply {
+        return inflater.inflate(R.layout.composable_schedule_card, parent, false).apply {
             id = View.generateViewId() // Generate a unique ID for each inflated view
         }
     }

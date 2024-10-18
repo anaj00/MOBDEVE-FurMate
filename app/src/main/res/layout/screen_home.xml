@@ -6,7 +6,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Nested ScrollView containing all scrollable content -->
     <androidx.core.widget.NestedScrollView
         android:id="@+id/scroll_body"
         android:layout_width="match_parent"
@@ -37,16 +36,16 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/today_content"
+                <!-- RecyclerView for today items -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/today_recycler_view"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/today_header">
+                    app:layout_constraintTop_toBottomOf="@id/today_header" />
 
-                </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <!-- Upcoming Pane -->
@@ -69,32 +68,21 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/upcoming_content"
+                <!-- RecyclerView for upcoming items -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/upcoming_recycler_view"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
+                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/upcoming_header">
+                    app:layout_constraintTop_toBottomOf="@id/upcoming_header" />
 
-                </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.constraintlayout.widget.ConstraintLayout>
+
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>
-
-     <com.google.android.material.floatingactionbutton.FloatingActionButton
-         android:id="@+id/add_schedule"
-         android:layout_width="wrap_content"
-         android:layout_height="wrap_content"
-         android:layout_gravity="bottom|end"
-         android:layout_margin="8dp"
-         android:clickable="true"
-         android:contentDescription="Add new item"
-         app:elevation="4dp"
-         app:layout_anchorGravity="bottom|end"
-         app:srcCompat="@android:drawable/ic_input_add"
-     />
 
     <include
         android:id="@+id/form_layout"

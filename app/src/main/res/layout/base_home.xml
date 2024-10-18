@@ -1,0 +1,73 @@
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/home_coord"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- FrameLayout for fragment container -->
+    <FrameLayout
+        android:id="@+id/fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/bottom_navigation"
+        android:paddingLeft="16dp"
+        android:paddingTop="16dp"
+        android:paddingRight="16dp"
+        android:paddingBottom="90dp" />
+
+    <!-- Floating Action Button (FAB) moved outside the FrameLayout -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/add_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginRight="16dp"
+        android:layout_marginBottom="96dp"
+        android:clickable="true"
+        android:contentDescription="Add new item"
+        android:focusable="true"
+        app:srcCompat="@android:drawable/ic_input_add" />
+
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/add_record"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginRight="16dp"
+        android:layout_marginBottom="236dp"
+        android:clickable="true"
+        android:contentDescription="Add new schedule"
+        android:focusable="true"
+        android:text="Add schedule"
+        android:visibility="gone"
+        app:icon="@drawable/calendar"
+        app:iconSize="14dp" />
+
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/add_schedule"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginRight="16dp"
+        android:layout_marginBottom="166dp"
+        android:clickable="true"
+        android:contentDescription="Add new record"
+        android:focusable="true"
+        android:text="Add record"
+        android:visibility="gone"
+        app:icon="@drawable/record"
+        app:iconSize="14dp" />
+
+    <!-- Bottom Navigation View -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="@drawable/curved_background"
+        android:elevation="0dp"
+        app:itemIconSize="20dp"
+        app:labelVisibilityMode="selected"
+        app:menu="@menu/bottom_nav_menu" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -21,7 +21,7 @@
         </activity>
 
         <!-- InApp activity -->
-        <activity android:name=".InApp" />
+        <activity android:name=".HomeActivity" />
 
     </application>
 
