@@ -1,3 +1,4 @@
+import android.animation.ObjectAnimator
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -5,8 +6,10 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.core.animation.doOnEnd
 import androidx.fragment.app.Fragment
 import com.example.furmate.R
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 data class Task(val name: String, val time: String) // Data class representing each task
 
@@ -28,7 +31,31 @@ class HomeFragment : Fragment() {
         val upcoming_content_pane = rootView.findViewById<ConstraintLayout>(R.id.upcoming_content)
         addTasksToLayout(upcoming_content_pane, upcoming_tasks, inflater)
 
+        handleFAB(rootView)
         return rootView
+    }
+
+    //
+    private fun handleFAB(rootView: View) {
+        val fab: FloatingActionButton = rootView.findViewById(R.id.add_schedule)
+        val formLayout: View = rootView.findViewById(R.id.form_layout)
+
+        fab.setOnClickListener {
+            if (formLayout.visibility == View.GONE) {
+                formLayout.visibility = View.VISIBLE
+                val animator = ObjectAnimator.ofFloat(formLayout, "translationY", 1000f, 0f)
+                animator.duration = 500
+                animator.start()
+            } else {
+                val animator = ObjectAnimator.ofFloat(formLayout, "translationY", 0f, 1000f)
+                animator.duration = 500
+                animator.start()
+                animator.doOnEnd {
+                    formLayout.visibility = View.GONE
+                }
+            }
+        }
+
     }
 
     // Function to get a list of sample tasks

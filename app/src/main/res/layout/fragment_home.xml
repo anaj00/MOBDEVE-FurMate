@@ -84,15 +84,25 @@
     </androidx.core.widget.NestedScrollView>
 
      <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/floatingActionButton"
-        android:layout_width="wrap_content"
+         android:id="@+id/add_schedule"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:layout_gravity="bottom|end"
+         android:layout_margin="8dp"
+         android:clickable="true"
+         android:contentDescription="Add new item"
+         app:elevation="4dp"
+         app:layout_anchorGravity="bottom|end"
+         app:srcCompat="@android:drawable/ic_input_add"
+     />
+
+    <include
+        android:id="@+id/form_layout"
+        layout="@layout/form_schedule"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="8dp"
-        android:clickable="true"
-        android:contentDescription="Add new item"
-        app:elevation="4dp"
-        app:layout_anchorGravity="bottom|end"
-        app:srcCompat="@android:drawable/ic_input_add" />
+        android:layout_gravity="bottom"
+        android:visibility="gone" />
+
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
