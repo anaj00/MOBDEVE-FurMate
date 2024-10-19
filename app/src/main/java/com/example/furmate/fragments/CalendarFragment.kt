@@ -7,6 +7,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.furmate.FormScheduleFragment
 import com.example.furmate.R
 import com.example.furmate.adapter.TaskAdapter
 import com.example.furmate.models.Task
@@ -41,7 +42,21 @@ class CalendarFragment : Fragment() {
         // Set up RecyclerView
         val dateRecyclerView = rootView.findViewById<RecyclerView>(R.id.day_listview)
         dateRecyclerView.apply {
-            adapter = TaskAdapter(getSampleTasks())
+            adapter = TaskAdapter(getSampleTasks()) { task ->
+                // Open the form schedule fragment with pre-filled data
+                val fragment = FormScheduleFragment.newInstance(
+                    isSchedule = true,
+                    title = task.name,
+                    date = task.time,
+                    where = "Unknown", // Add appropriate data
+                    pet = "Unknown",
+                    notes = "Some notes"
+                )
+                parentFragmentManager.beginTransaction()
+                    .replace(R.id.fragment_container, fragment)
+                    .addToBackStack(null)
+                    .commit()
+            }
             layoutManager = LinearLayoutManager(context)
             addItemDecoration(MarginItemDecoration(16))
         }
@@ -69,10 +84,7 @@ class CalendarFragment : Fragment() {
             Task("Take a Bath", "10:00 AM"),
             Task("Walk the Dog", "8:30 AM"),
             Task("Feed the Cat", "9:00 AM"),
-            Task("Take a Bath", "10:00 AM"),
-            Task("Walk the Dog", "8:30 AM"),
-            Task("Feed the Cat", "9:00 AM"),
-            Task("Take a Bath", "10:00 AM"),
+            Task("Take a Bath", "10:00 AM")
         )
     }
 }

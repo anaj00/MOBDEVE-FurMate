@@ -63,13 +63,20 @@ class HomeActivity : AppCompatActivity() {
         }
     }
 
-    private fun openFormSchedule(isSchedule: Boolean) {
-        // Load form_schedule fragment and hide FABs
+    private fun openFormSchedule(
+        isSchedule: Boolean,
+        title: String? = null,
+        date: String? = null,
+        where: String? = null,
+        pet: String? = null,
+        notes: String? = null
+    ) {
+        // Load form_schedule fragment with pre-filled data and hide FABs
         hideFABs()
-        loadFragment(FormScheduleFragment(isSchedule))
+        val fragment = FormScheduleFragment.newInstance(isSchedule, title, date, where, pet, notes)
+        loadFragment(fragment)
     }
 
-    // Function to handle FAB click
     private fun handleFABClick() {
         mainFAB.setOnClickListener {
             toggleFABMenu()
@@ -119,7 +126,6 @@ class HomeActivity : AppCompatActivity() {
         return super.onTouchEvent(event)
     }
 
-    // Function to load a fragment
     private fun loadFragment(fragment: Fragment) {
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragment_container, fragment)
@@ -127,7 +133,6 @@ class HomeActivity : AppCompatActivity() {
             .commit()
     }
 
-    // Override onBackPressed to handle FAB visibility
     override fun onBackPressed() {
         // Get the current fragment
         val currentFragment = supportFragmentManager.findFragmentById(R.id.fragment_container)

@@ -11,7 +11,7 @@
         android:layout_height="match_parent"
         android:layout_above="@id/bottom_navigation"
         android:paddingLeft="16dp"
-        android:paddingTop="16dp"
+        android:paddingTop="24dp"
         android:paddingRight="16dp"
         android:paddingBottom="90dp" />
 
@@ -29,7 +29,7 @@
         app:srcCompat="@android:drawable/ic_input_add" />
 
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-        android:id="@+id/add_record"
+        android:id="@+id/add_schedule"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
@@ -44,7 +44,7 @@
         app:iconSize="14dp" />
 
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-        android:id="@+id/add_schedule"
+        android:id="@+id/add_record"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"

@@ -16,7 +16,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
-            android:id="@+id/login_header"
+            android:id="@+id/form_header"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Let's Get Started 🚀"
@@ -27,7 +27,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/date_div"
+            android:id="@+id/enter_hint_div"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="52dp"
@@ -42,10 +42,10 @@
             app:hintEnabled="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/login_header">
+            app:layout_constraintTop_toBottomOf="@id/form_header">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/input_username"
+                android:id="@+id/input_field"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint=""
@@ -69,7 +69,7 @@
             app:hintEnabled="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/date_div">
+            app:layout_constraintTop_toBottomOf="@id/enter_hint_div">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/input_email"

@@ -8,6 +8,7 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.furmate.FormScheduleFragment
 import com.example.furmate.R
 import com.example.furmate.models.Task
 import com.example.furmate.adapter.TaskAdapter
@@ -25,19 +26,35 @@ class HomeFragment : Fragment() {
         val todayRecyclerView = rootView.findViewById<RecyclerView>(R.id.today_recycler_view)
         val todayTasks = getSampleTasks()
         todayRecyclerView.layoutManager = LinearLayoutManager(context)
-        todayRecyclerView.adapter = TaskAdapter(todayTasks)
+        todayRecyclerView.adapter = TaskAdapter(todayTasks){task -> openTaskDetail(task)}
         todayRecyclerView.addItemDecoration(MarginItemDecoration(16))
 
         // Set up RecyclerView for "Upcoming" pane
         val upcomingRecyclerView = rootView.findViewById<RecyclerView>(R.id.upcoming_recycler_view)
         val upcomingTasks = getSampleTasks()
         upcomingRecyclerView.layoutManager = LinearLayoutManager(context)
-        upcomingRecyclerView.adapter = TaskAdapter(upcomingTasks)
+        upcomingRecyclerView.adapter = TaskAdapter(upcomingTasks){task -> openTaskDetail(task)}
         upcomingRecyclerView.addItemDecoration(MarginItemDecoration(16))
 
         return rootView
     }
 
+    // Function to open a task in detail (or open a form with pre-filled data)
+    private fun openTaskDetail(task: Task) {
+        // Handle task click and open the form with pre-filled task details
+        val fragment = FormScheduleFragment.newInstance(
+            isSchedule = true,
+            title = task.name,
+            date = task.time,
+            where = "Location",  // Add relevant data here
+            pet = "Pet Name",     // Add relevant data here
+            notes = "Notes"       // Add relevant data here
+        )
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, fragment)
+            .addToBackStack(null)
+            .commit()
+    }
 
     // Function to get a list of sample tasks
     private fun getSampleTasks(): List<Task> {
