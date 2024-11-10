@@ -16,10 +16,12 @@ import com.example.furmate.adapter.TaskAdapter
 import com.example.furmate.utils.MarginItemDecoration
 
 class HomeFragment : Fragment() {
+    companion object {
+        const val BACK_STACK_NAME = "HOME"
+    }
+
     private lateinit var todayTasks: ArrayList<Task>
     private lateinit var upcomingTasks: ArrayList<Task>
-
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -74,7 +76,7 @@ class HomeFragment : Fragment() {
         )
         parentFragmentManager.beginTransaction()
             .replace(R.id.fragment_container, fragment)
-            .addToBackStack(null)
+            .addToBackStack(BACK_STACK_NAME)
             .commit()
     }
 

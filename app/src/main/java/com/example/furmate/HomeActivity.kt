@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.transition.TransitionManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -13,13 +14,16 @@ import CalendarFragment
 import HomeFragment
 import PetsFragment
 import android.graphics.Rect
-import android.util.Log
 import android.view.MotionEvent
+import androidx.fragment.app.commit
+import androidx.fragment.app.commitNow
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 
 class HomeActivity : AppCompatActivity() {
-
     private var isFabMenuOpen = false
+
+    // store name of current fragment as key to save back stack state
+    private var currentFragmentName : String? = null;
 
     // Declare FABs here so they are only initialized once
     private lateinit var mainFAB: FloatingActionButton
@@ -37,15 +41,24 @@ class HomeActivity : AppCompatActivity() {
 
         val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_navigation)
 
-        // Set default fragment
-        loadInitialFragment(HomeFragment())
+        // create default back stacks for all fragments in bottom menu
+        createFragments()
 
         // Handle bottom navigation item clicks
         bottomNavigationView.setOnNavigationItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.home -> loadFragment(HomeFragment())
-                R.id.calendar -> loadFragment(CalendarFragment())
-                R.id.pets -> loadFragment(PetsFragment())
+                R.id.home -> {
+                    loadFragment("Home")
+                    showFABs()
+                }
+                R.id.calendar -> {
+                    loadFragment("Calendar")
+                    hideFABs()
+                }
+                R.id.pets -> {
+                    loadFragment("Pets")
+                    hideFABs()
+                }
             }
             true
         }
@@ -76,7 +89,13 @@ class HomeActivity : AppCompatActivity() {
         // Load form_schedule fragment with pre-filled data and hide FABs
         hideFABs()
         val fragment = FormScheduleFragment.newInstance(isSchedule, title, date, where, pet, notes)
-        loadFragment(fragment)
+        supportFragmentManager.commit {
+            setReorderingAllowed(true)
+            replace(R.id.fragment_container, fragment)
+            // can safely add to back stack since this button is only visible
+            // while the user is on the HomeScreen
+            addToBackStack(null)
+        }
     }
 
     private fun handleFABClick() {
@@ -128,17 +147,40 @@ class HomeActivity : AppCompatActivity() {
         return super.onTouchEvent(event)
     }
 
-    private fun loadInitialFragment(fragment: Fragment) {
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, fragment)
-            .commit()
+    private fun createFragments() {
+
+        supportFragmentManager.commit {
+            setReorderingAllowed(true)
+            replace(R.id.fragment_container, CalendarFragment())
+            addToBackStack("Calendar")
+        }
+
+        supportFragmentManager.saveBackStack("Calendar")
+
+        supportFragmentManager.commit {
+            setReorderingAllowed(true)
+            replace(R.id.fragment_container, PetsFragment())
+            addToBackStack("Pets")
+        }
+
+        supportFragmentManager.saveBackStack("Pets")
+
+        supportFragmentManager.commit {
+            setReorderingAllowed(true)
+            replace(R.id.fragment_container, HomeFragment())
+            addToBackStack("Home")
+        }
+
+        currentFragmentName = "Home"
     }
 
-    private fun loadFragment(fragment: Fragment) {
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, fragment)
-            .addToBackStack(null)
-            .commit()
+    private fun loadFragment(name: String) {
+        if (currentFragmentName != null) {
+            supportFragmentManager.saveBackStack(currentFragmentName!!)
+        }
+
+        supportFragmentManager.restoreBackStack(name)
+        currentFragmentName = name
     }
 
     override fun onBackPressed() {

@@ -15,8 +15,8 @@ import com.example.furmate.adapter.ComposableInputAdapter
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 
-class FormScheduleFragment(private val isSchedule: Boolean) : Fragment() {
-
+class FormScheduleFragment() : Fragment() {
+    private var isSchedule: Boolean? = null;
     private var taskTitle: String? = null
     private var taskDate: String? = null
     private var taskWhere: String? = null
@@ -29,6 +29,7 @@ class FormScheduleFragment(private val isSchedule: Boolean) : Fragment() {
         super.onCreate(savedInstanceState)
 
         arguments?.let {
+            isSchedule = it.getBoolean("is_schedule")
             taskTitle = it.getString("task_title")
             taskDate = it.getString("task_date")
             taskWhere = it.getString("task_where")
@@ -47,7 +48,7 @@ class FormScheduleFragment(private val isSchedule: Boolean) : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(context)
 
         val header = rootView.findViewById<TextView>(R.id.form_header)
-        if (isSchedule) {
+        if (isSchedule!!) {
             header.text = "Add a new schedule"
         } else {
             header.text = "Add a new record"
@@ -58,7 +59,7 @@ class FormScheduleFragment(private val isSchedule: Boolean) : Fragment() {
             activity?.onBackPressed() // Go back to the previous fragment
         }
 
-        val composableInputs = if (isSchedule) {
+        val composableInputs = if (isSchedule!!) {
             listOf("Title", "Date", "Where", "Pet", "Notes")
         } else {
             listOf("Title", "Pet", "Notes")
@@ -66,7 +67,7 @@ class FormScheduleFragment(private val isSchedule: Boolean) : Fragment() {
 
         // Pre-fill the fields if task data exists
         val inputValues = if (taskTitle != null) {
-            if (isSchedule) {
+            if (isSchedule!!) {
                 listOf(taskTitle ?: "", taskDate ?: "", taskWhere ?: "", taskPet ?: "", taskNotes ?: "")
             } else {
                 listOf(taskTitle ?: "", taskPet ?: "", taskNotes ?: "")
@@ -104,8 +105,9 @@ class FormScheduleFragment(private val isSchedule: Boolean) : Fragment() {
             isSchedule: Boolean, title: String?, date: String?, where: String?,
             pet: String?, notes: String?
         ): FormScheduleFragment {
-            val fragment = FormScheduleFragment(isSchedule)
+            val fragment = FormScheduleFragment()
             val args = Bundle()
+            args.putBoolean("is_schedule", isSchedule)
             args.putString("task_title", title)
             args.putString("task_date", date)
             args.putString("task_where", where)
