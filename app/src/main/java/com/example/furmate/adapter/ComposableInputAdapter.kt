@@ -1,5 +1,6 @@
 package com.example.furmate.adapter
 
+import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,6 +17,8 @@ class ComposableInputAdapter(
     class InputViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val inputLayout: TextInputLayout = itemView.findViewById(R.id.enter_hint_div)  // TextInputLayout
         val inputText: TextInputEditText = itemView.findViewById(R.id.input_field)  // TextInputEditText within the layout
+
+
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): InputViewHolder {

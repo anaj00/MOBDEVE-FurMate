@@ -6,10 +6,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import androidx.core.os.bundleOf
+import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.furmate.adapter.ComposableInputAdapter
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 
 class FormScheduleFragment(private val isSchedule: Boolean) : Fragment() {
 
@@ -18,6 +22,8 @@ class FormScheduleFragment(private val isSchedule: Boolean) : Fragment() {
     private var taskWhere: String? = null
     private var taskPet: String? = null
     private var taskNotes: String? = null
+
+    private lateinit var submitButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,6 +77,23 @@ class FormScheduleFragment(private val isSchedule: Boolean) : Fragment() {
 
         val adapter = ComposableInputAdapter(composableInputs, inputValues)
         recyclerView.adapter = adapter
+
+        submitButton = rootView.findViewById(R.id.create_account_btn);
+        submitButton.setOnClickListener {
+            val ret = Bundle()
+
+            for (child in recyclerView.children) {
+                val holder = recyclerView.getChildViewHolder(child)
+                val key = holder.itemView.findViewById<TextInputLayout>(R.id.enter_hint_div).hint.toString()
+                val value = holder.itemView.findViewById<TextInputEditText>(R.id.input_field).text.toString()
+
+                val formattedKey = "KEY_" + key.uppercase()
+                ret.putString(formattedKey, value)
+            }
+
+            parentFragmentManager.setFragmentResult("KEY_NEW_SCHEDULE", ret)
+            activity?.onBackPressed()
+        }
 
         return rootView
     }

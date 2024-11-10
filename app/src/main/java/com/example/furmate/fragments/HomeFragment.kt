@@ -1,4 +1,5 @@
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,6 +16,10 @@ import com.example.furmate.adapter.TaskAdapter
 import com.example.furmate.utils.MarginItemDecoration
 
 class HomeFragment : Fragment() {
+    private lateinit var todayTasks: ArrayList<Task>
+    private lateinit var upcomingTasks: ArrayList<Task>
+
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -24,17 +29,34 @@ class HomeFragment : Fragment() {
 
         // Set up RecyclerView for "Today" pane
         val todayRecyclerView = rootView.findViewById<RecyclerView>(R.id.today_recycler_view)
-        val todayTasks = getSampleTasks()
+        todayTasks = ArrayList(getSampleTasks())
         todayRecyclerView.layoutManager = LinearLayoutManager(context)
         todayRecyclerView.adapter = TaskAdapter(todayTasks){task -> openTaskDetail(task)}
         todayRecyclerView.addItemDecoration(MarginItemDecoration(16))
 
         // Set up RecyclerView for "Upcoming" pane
         val upcomingRecyclerView = rootView.findViewById<RecyclerView>(R.id.upcoming_recycler_view)
-        val upcomingTasks = getSampleTasks()
+        upcomingTasks = ArrayList(getSampleTasks())
         upcomingRecyclerView.layoutManager = LinearLayoutManager(context)
         upcomingRecyclerView.adapter = TaskAdapter(upcomingTasks){task -> openTaskDetail(task)}
         upcomingRecyclerView.addItemDecoration(MarginItemDecoration(16))
+
+        parentFragmentManager.setFragmentResultListener("KEY_NEW_SCHEDULE", this) { requestKey, bundle ->
+            for (key in bundle.keySet()) {
+                Log.d(key, bundle.getString(key)!!)
+            }
+
+            val pet = bundle.getString("KEY_PET")!!
+            val date = bundle.getString("KEY_DATE")!!
+            val notes = bundle.getString("KEY_NOTES")!!
+            val title = bundle.getString("KEY_TITLE")!!
+            val where = bundle.getString("KEY_WHERE")!!
+
+            // TODO: add the rest of the bundle values
+            todayTasks.add(Task(title, date))
+            (todayRecyclerView.adapter as RecyclerView.Adapter)
+                .notifyItemInserted(todayTasks.size - 1)
+        }
 
         return rootView
     }

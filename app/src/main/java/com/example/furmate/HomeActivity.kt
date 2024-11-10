@@ -13,6 +13,7 @@ import CalendarFragment
 import HomeFragment
 import PetsFragment
 import android.graphics.Rect
+import android.util.Log
 import android.view.MotionEvent
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 
@@ -37,7 +38,7 @@ class HomeActivity : AppCompatActivity() {
         val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_navigation)
 
         // Set default fragment
-        loadFragment(HomeFragment())
+        loadInitialFragment(HomeFragment())
 
         // Handle bottom navigation item clicks
         bottomNavigationView.setOnNavigationItemSelectedListener { item ->
@@ -61,6 +62,7 @@ class HomeActivity : AppCompatActivity() {
         recordFAB.setOnClickListener {
             openFormSchedule(isSchedule = false)
         }
+
     }
 
     private fun openFormSchedule(
@@ -124,6 +126,12 @@ class HomeActivity : AppCompatActivity() {
             }
         }
         return super.onTouchEvent(event)
+    }
+
+    private fun loadInitialFragment(fragment: Fragment) {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, fragment)
+            .commit()
     }
 
     private fun loadFragment(fragment: Fragment) {
