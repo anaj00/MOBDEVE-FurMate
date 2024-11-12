@@ -20,10 +20,19 @@ import androidx.fragment.app.commitNow
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 
 class HomeActivity : AppCompatActivity() {
+    companion object {
+        enum class FragmentName {
+            HOME, CALENDAR, PETS
+        }
+    }
+
     private var isFabMenuOpen = false
 
     // store name of current fragment as key to save back stack state
-    private var currentFragmentName : String? = null;
+    private var currentFragmentName : String? = null
+
+    // store current fragments to prevent them from being regenerated
+    private lateinit var fragments : HashMap<String, Fragment>
 
     // Declare FABs here so they are only initialized once
     private lateinit var mainFAB: FloatingActionButton
@@ -48,15 +57,15 @@ class HomeActivity : AppCompatActivity() {
         bottomNavigationView.setOnNavigationItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.home -> {
-                    loadFragment("Home")
+                    loadFragment(FragmentName.HOME.name)
                     showFABs()
                 }
                 R.id.calendar -> {
-                    loadFragment("Calendar")
+                    loadFragment(FragmentName.CALENDAR.name)
                     hideFABs()
                 }
                 R.id.pets -> {
-                    loadFragment("Pets")
+                    loadFragment(FragmentName.PETS.name)
                     hideFABs()
                 }
             }
@@ -148,35 +157,26 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun createFragments() {
+        fragments = HashMap()
+        fragments[FragmentName.CALENDAR.name] = CalendarFragment()
+        fragments[FragmentName.PETS.name] = PetsFragment()
+        fragments[FragmentName.HOME.name] = HomeFragment()
 
+        currentFragmentName = FragmentName.HOME.name
         supportFragmentManager.commit {
             setReorderingAllowed(true)
-            replace(R.id.fragment_container, CalendarFragment())
-            addToBackStack("Calendar")
+            replace(R.id.fragment_container, fragments[currentFragmentName]!!)
         }
-
-        supportFragmentManager.saveBackStack("Calendar")
-
-        supportFragmentManager.commit {
-            setReorderingAllowed(true)
-            replace(R.id.fragment_container, PetsFragment())
-            addToBackStack("Pets")
-        }
-
-        supportFragmentManager.saveBackStack("Pets")
-
-        supportFragmentManager.commit {
-            setReorderingAllowed(true)
-            replace(R.id.fragment_container, HomeFragment())
-            addToBackStack("Home")
-        }
-
-        currentFragmentName = "Home"
     }
 
     private fun loadFragment(name: String) {
         if (currentFragmentName != null) {
             supportFragmentManager.saveBackStack(currentFragmentName!!)
+        }
+
+        supportFragmentManager.commit {
+            setReorderingAllowed(true)
+            replace(R.id.fragment_container, fragments[name]!!)
         }
 
         supportFragmentManager.restoreBackStack(name)
@@ -194,6 +194,8 @@ class HomeActivity : AppCompatActivity() {
 
         // Call the default onBackPressed behavior to pop the fragment back stack
         super.onBackPressed()
+
+
     }
 
     private fun showFABs() {

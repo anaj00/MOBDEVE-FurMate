@@ -10,16 +10,13 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.furmate.FormScheduleFragment
+import com.example.furmate.HomeActivity
 import com.example.furmate.R
 import com.example.furmate.models.Task
 import com.example.furmate.adapter.TaskAdapter
 import com.example.furmate.utils.MarginItemDecoration
 
 class HomeFragment : Fragment() {
-    companion object {
-        const val BACK_STACK_NAME = "HOME"
-    }
-
     private lateinit var todayTasks: ArrayList<Task>
     private lateinit var upcomingTasks: ArrayList<Task>
 
@@ -75,8 +72,9 @@ class HomeFragment : Fragment() {
             notes = "Notes"       // Add relevant data here
         )
         parentFragmentManager.beginTransaction()
+            .setReorderingAllowed(true)
             .replace(R.id.fragment_container, fragment)
-            .addToBackStack(BACK_STACK_NAME)
+            .addToBackStack(HomeActivity.Companion.FragmentName.HOME.name)
             .commit()
     }
 
