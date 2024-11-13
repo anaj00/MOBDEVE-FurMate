@@ -25,6 +25,8 @@ class FormScheduleFragment() : Fragment() {
 
     private lateinit var submitButton: Button
 
+    private lateinit var recyclerView: RecyclerView
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -36,6 +38,15 @@ class FormScheduleFragment() : Fragment() {
             taskPet = it.getString("task_pet")
             taskNotes = it.getString("task_notes")
         }
+
+        // restore data from when screen was unloaded
+        if (savedInstanceState != null) {
+            taskTitle = savedInstanceState.getString("Title")
+            taskDate = savedInstanceState.getString("Date")
+            taskWhere = savedInstanceState.getString("Where")
+            taskPet = savedInstanceState.getString("Pet")
+            taskNotes = savedInstanceState.getString("Notes")
+        }
     }
 
     override fun onCreateView(
@@ -44,7 +55,7 @@ class FormScheduleFragment() : Fragment() {
     ): View? {
         val rootView = inflater.inflate(R.layout.form_schedule, container, false)
 
-        val recyclerView = rootView.findViewById<RecyclerView>(R.id.input_wrapper)
+        recyclerView = rootView.findViewById<RecyclerView>(R.id.input_wrapper)
         recyclerView.layoutManager = LinearLayoutManager(context)
 
         val header = rootView.findViewById<TextView>(R.id.form_header)
@@ -97,6 +108,18 @@ class FormScheduleFragment() : Fragment() {
         }
 
         return rootView
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+
+        for (child in recyclerView.children) {
+            val holder = recyclerView.getChildViewHolder(child)
+            val key = holder.itemView.findViewById<TextInputLayout>(R.id.enter_hint_div).hint.toString()
+            val value = holder.itemView.findViewById<TextInputEditText>(R.id.input_field).text.toString()
+
+            outState.putString(key, value)
+        }
     }
 
     companion object {
