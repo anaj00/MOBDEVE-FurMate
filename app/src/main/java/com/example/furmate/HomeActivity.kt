@@ -1,23 +1,30 @@
 package com.example.furmate
 
-import android.os.Bundle
-import android.view.View
-import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
-import androidx.transition.TransitionManager
-import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.android.material.transition.MaterialFadeThrough
-
 import CalendarFragment
 import HomeFragment
 import PetsFragment
 import android.graphics.Rect
+import android.os.Bundle
+import android.util.Log
 import android.view.MotionEvent
+import android.view.View
+import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
-import androidx.fragment.app.commitNow
+import androidx.transition.TransitionManager
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.transition.MaterialFadeThrough
+import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.Blob
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+import java.time.LocalDate
+import java.util.Date
+
 
 class HomeActivity : AppCompatActivity() {
     companion object {

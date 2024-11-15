@@ -60,4 +60,5 @@ dependencies {
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.ui.firestore)
+    implementation(libs.google.firebase.auth)
 }

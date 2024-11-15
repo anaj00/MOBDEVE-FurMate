@@ -28,6 +28,7 @@ firebase-firestore = { module = "com.google.firebase:firebase-firestore", versio
 firebase-storage = { module = "com.google.firebase:firebase-storage", version.ref = "firebaseStorage" }
 firebase-ui-firestore = { module = "com.firebaseui:firebase-ui-firestore", version.ref = "firebaseUiFirestore" }
 firebase-ui-storage = { module = "com.firebaseui:firebase-ui-storage", version.ref = "firebaseUiStorage" }
+google-firebase-auth = { module = "com.google.firebase:firebase-auth" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }

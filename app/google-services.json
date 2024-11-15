@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "756574244758",
+    "project_id": "furmate-d1e0c",
+    "storage_bucket": "furmate-d1e0c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:756574244758:android:b609adf8dcc980161e17b7",
+        "android_client_info": {
+          "package_name": "com.example.furmate"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCIiJxHK48I-1zYYo8gIQwQkBzSwq1_wmI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
