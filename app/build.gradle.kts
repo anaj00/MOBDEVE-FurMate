@@ -61,4 +61,7 @@ dependencies {
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.ui.firestore)
     implementation(libs.google.firebase.auth)
+
+    // Picasso
+    implementation(libs.picasso)
 }
