@@ -1,3 +1,5 @@
+package com.example.furmate.fragments
+
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -52,7 +54,7 @@ class HomeFragment : Fragment() {
             val where = bundle.getString("KEY_WHERE")!!
 
             // TODO: add the rest of the bundle values
-            todayTasks.add(Task(title, date))
+            todayTasks.add(Task(title, date, where, pet, notes))
             (todayRecyclerView.adapter as RecyclerView.Adapter)
                 .notifyItemInserted(todayTasks.size - 1)
         }
@@ -81,21 +83,18 @@ class HomeFragment : Fragment() {
     // Function to get a list of sample tasks
     private fun getSampleTasks(): List<Task> {
         return listOf(
-            Task("Walk the Dog", "8:30 AM"),
-            Task("Feed the Cat", "9:00 AM"),
-            Task("Take a Bath", "10:00 AM"),
-            Task("Walk the Dog", "8:30 AM"),
-            Task("Feed the Cat", "9:00 AM"),
-            Task("Take a Bath", "10:00 AM"),
-            Task("Walk the Dog", "8:30 AM"),
-            Task("Feed the Cat", "9:00 AM"),
-            Task("Take a Bath", "10:00 AM"),
-            Task("Walk the Dog", "8:30 AM"),
-            Task("Feed the Cat", "9:00 AM"),
-            Task("Take a Bath", "10:00 AM"),
-            Task("Walk the Dog", "8:30 AM"),
-            Task("Feed the Cat", "9:00 AM"),
-            Task("Take a Bath", "10:00 AM"),
+            Task("Walk the Dog", "8:30 AM", "Park", "boopie"),
+            Task("Feed the Cat", "9:00 AM", "Home", "baabaa"),
+            Task("Take a Bath", "10:00 AM", "Home", "booboo"),
+            Task("Walk the Dog", "8:30 AM", "Park", "boopie"),
+            Task("Feed the Cat", "9:00 AM", "Home", "baabaa"),
+            Task("Take a Bath", "10:00 AM", "Home", "booboo"),
+            Task("Walk the Dog", "8:30 AM", "Park", "boopie"),
+            Task("Feed the Cat", "9:00 AM", "Home", "baabaa"),
+            Task("Take a Bath", "10:00 AM", "Home", "booboo"),
+            Task("Walk the Dog", "8:30 AM", "Park", "boopie"),
+            Task("Feed the Cat", "9:00 AM", "Home", "baabaa"),
+            Task("Take a Bath", "10:00 AM", "Home", "booboo"),
         )
     }
 

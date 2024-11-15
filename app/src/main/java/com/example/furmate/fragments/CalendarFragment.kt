@@ -73,18 +73,18 @@ class CalendarFragment : Fragment() {
     // Sample tasks
     private fun getSampleTasks(): List<Task> {
         return listOf(
-            Task("Walk the Dog", "8:30 AM"),
-            Task("Feed the Cat", "9:00 AM"),
-            Task("Take a Bath", "10:00 AM"),
-            Task("Walk the Dog", "8:30 AM"),
-            Task("Feed the Cat", "9:00 AM"),
-            Task("Take a Bath", "10:00 AM"),
-            Task("Walk the Dog", "8:30 AM"),
-            Task("Feed the Cat", "9:00 AM"),
-            Task("Take a Bath", "10:00 AM"),
-            Task("Walk the Dog", "8:30 AM"),
-            Task("Feed the Cat", "9:00 AM"),
-            Task("Take a Bath", "10:00 AM")
+            Task("Walk the Dog", "8:30 AM", "Park", "boopie"),
+            Task("Feed the Cat", "9:00 AM", "Home", "baabaa"),
+            Task("Take a Bath", "10:00 AM", "Home", "booboo"),
+            Task("Walk the Dog", "8:30 AM", "Park", "boopie"),
+            Task("Feed the Cat", "9:00 AM", "Home", "baabaa"),
+            Task("Take a Bath", "10:00 AM", "Home", "booboo"),
+            Task("Walk the Dog", "8:30 AM", "Park", "boopie"),
+            Task("Feed the Cat", "9:00 AM", "Home", "baabaa"),
+            Task("Take a Bath", "10:00 AM", "Home", "booboo"),
+            Task("Walk the Dog", "8:30 AM", "Park", "boopie"),
+            Task("Feed the Cat", "9:00 AM", "Home", "baabaa"),
+            Task("Take a Bath", "10:00 AM", "Home", "booboo"),
         )
     }
 }
