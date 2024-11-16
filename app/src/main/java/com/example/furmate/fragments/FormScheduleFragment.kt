@@ -1,6 +1,7 @@
 package com.example.furmate
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,8 +13,18 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.furmate.adapter.ComposableInputAdapter
+import com.example.furmate.adapter.TaskAdapter
+import com.example.furmate.db.TaskRepositoryAPI
+import com.example.furmate.models.Task
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.CollectionReference
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FirebaseFirestore
+
 
 class FormScheduleFragment() : Fragment() {
     private var isSchedule: Boolean? = null;
@@ -26,6 +37,13 @@ class FormScheduleFragment() : Fragment() {
     private lateinit var submitButton: Button
 
     private lateinit var recyclerView: RecyclerView
+
+    // Firestore Collections
+    private lateinit var taskCollection: CollectionReference
+
+    // APIs
+    private lateinit var taskRepositoryAPI: TaskRepositoryAPI
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,8 +76,14 @@ class FormScheduleFragment() : Fragment() {
         recyclerView = rootView.findViewById<RecyclerView>(R.id.input_wrapper)
         recyclerView.layoutManager = LinearLayoutManager(context)
 
+        // Initialize the Firestore instance
+        val firestore = FirebaseFirestore.getInstance()
+
         val header = rootView.findViewById<TextView>(R.id.form_header)
         if (isSchedule!!) {
+            // Initialize the Firestore collection
+            taskCollection = firestore.collection("tasks")
+            taskRepositoryAPI = TaskRepositoryAPI(taskCollection)
             header.text = "Add a new schedule"
         } else {
             header.text = "Add a new record"
@@ -92,6 +116,8 @@ class FormScheduleFragment() : Fragment() {
 
         submitButton = rootView.findViewById(R.id.create_account_btn);
         submitButton.setOnClickListener {
+            val taskData = mutableMapOf<String, String>()
+
             val ret = Bundle()
 
             for (child in recyclerView.children) {
@@ -100,11 +126,29 @@ class FormScheduleFragment() : Fragment() {
                 val value = holder.itemView.findViewById<TextInputEditText>(R.id.input_field).text.toString()
 
                 val formattedKey = "KEY_" + key.uppercase()
-                ret.putString(formattedKey, value)
+                taskData[key] = value
             }
 
-            parentFragmentManager.setFragmentResult("KEY_NEW_SCHEDULE", ret)
-            activity?.onBackPressed()
+            // Test for differentiating the return value
+
+            Log.d("FormScheduleFragment", "onCreateView: $taskData")
+
+            if (isSchedule!!) {
+                // Add the task to the Firestore database
+                 val task = Task(
+                     name = taskData["Title"]!!,
+                     time = taskData["Date"]!!,
+                     location = taskData["Where"]!!,
+                     petName = taskData["Pet"]!!,
+                     notes = taskData["Notes"]
+                 )
+                taskRepositoryAPI.addTask(task)
+            } else {
+                // Add the record to the Firestore database
+                Log.d("FormScheduleFragment", "Record submitted")
+            }
+
+            requireActivity().onBackPressedDispatcher.onBackPressed()
         }
 
         return rootView
