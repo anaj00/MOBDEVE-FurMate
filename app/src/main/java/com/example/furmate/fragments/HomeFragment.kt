@@ -1,4 +1,4 @@
-package com.example.furmate.fragments
+package com.example.furmate
 
 import android.os.Bundle
 import android.util.Log
@@ -11,12 +11,11 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.furmate.FormScheduleFragment
-import com.example.furmate.HomeActivity
-import com.example.furmate.R
 import com.example.furmate.models.Task
 import com.example.furmate.adapter.TaskAdapter
 import com.example.furmate.utils.MarginItemDecoration
+import com.google.firebase.firestore.FirebaseFirestore
+
 
 class HomeFragment : Fragment() {
     private lateinit var todayTasks: ArrayList<Task>
@@ -42,6 +41,10 @@ class HomeFragment : Fragment() {
         upcomingRecyclerView.adapter = TaskAdapter(upcomingTasks){task -> openTaskDetail(task)}
         upcomingRecyclerView.addItemDecoration(MarginItemDecoration(16))
 
+        // Fetch tasks from FireStore
+        fetchTodayTasks(todayRecyclerView)
+        fetchUpcomingTasks(upcomingRecyclerView)
+
         parentFragmentManager.setFragmentResultListener("KEY_NEW_SCHEDULE", this) { requestKey, bundle ->
             for (key in bundle.keySet()) {
                 Log.d(key, bundle.getString(key)!!)
@@ -60,6 +63,40 @@ class HomeFragment : Fragment() {
         }
 
         return rootView
+    }
+    private fun fetchTodayTasks(todayRecyclerView: RecyclerView) {
+        FirebaseFirestore.getInstance().collection("tasks")
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    Log.w("HomeFragment", "Listen failed.", error)
+                    return@addSnapshotListener
+                }
+                if (snapshot != null && !snapshot.isEmpty) { // Ensure snapshot is not empty
+                    val tasks = snapshot.documents.mapNotNull { it.toObject(Task::class.java) }
+                    todayTasks.clear()
+                    todayTasks.addAll(tasks) // Add all tasks to the list
+                    todayRecyclerView.adapter?.notifyDataSetChanged() // Notify the adapter of data change
+                } else {
+                    Log.d("HomeFragment", "No tasks found in the collection.")
+                }
+            }
+    }
+
+    private fun fetchUpcomingTasks(recyclerView: RecyclerView) {
+        FirebaseFirestore.getInstance().collection("tasks")
+            .whereGreaterThan("date", "today") // Adjust query for "Upcoming"
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    Log.e("HomeFragment", "Error fetching upcoming tasks", error)
+                    return@addSnapshotListener
+                }
+                if (snapshot != null) {
+                    val tasks = snapshot.documents.mapNotNull { it.toObject(Task::class.java) }
+                    upcomingTasks.clear()
+                    upcomingTasks.addAll(tasks)
+                    recyclerView.adapter?.notifyDataSetChanged()
+                }
+            }
     }
 
     // Function to open a task in detail (or open a form with pre-filled data)
