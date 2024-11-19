@@ -1,7 +1,6 @@
 package com.example.furmate
 
 import CalendarFragment
-import HomeFragment
 import PetsFragment
 import android.graphics.Bitmap
 import android.graphics.Rect
@@ -13,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.transition.TransitionManager
+import com.example.furmate.fragments.HomeFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton

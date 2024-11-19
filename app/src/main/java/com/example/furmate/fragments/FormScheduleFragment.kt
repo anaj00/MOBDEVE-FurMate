@@ -7,22 +7,17 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
-import androidx.core.os.bundleOf
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.furmate.adapter.ComposableInputAdapter
-import com.example.furmate.adapter.TaskAdapter
 import com.example.furmate.db.TaskRepositoryAPI
 import com.example.furmate.models.Task
+import com.example.furmate.utils.MarginItemDecoration
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
-import com.google.firebase.Firebase
 import com.google.firebase.firestore.CollectionReference
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 
 
@@ -75,10 +70,12 @@ class FormScheduleFragment() : Fragment() {
 
         recyclerView = rootView.findViewById<RecyclerView>(R.id.input_wrapper)
         recyclerView.layoutManager = LinearLayoutManager(context)
+        recyclerView.addItemDecoration(MarginItemDecoration(16))
 
         // Initialize the Firestore instance
         val firestore = FirebaseFirestore.getInstance()
 
+        // Change the header depending on the form type
         val header = rootView.findViewById<TextView>(R.id.form_header)
         if (isSchedule!!) {
             // Initialize the Firestore collection
@@ -89,13 +86,13 @@ class FormScheduleFragment() : Fragment() {
             header.text = "Add a new record"
         }
 
-        val backButton = rootView.findViewById<Button>(R.id.back_btn)
-        backButton.setOnClickListener {
-            activity?.onBackPressed() // Go back to the previous fragment
-        }
+//        val backButton = rootView.findViewById<Button>(R.id.back_btn)
+//        backButton.setOnClickListener {
+//            activity?.onBackPressed() // Go back to the previous fragment
+//        }
 
         val composableInputs = if (isSchedule!!) {
-            listOf("Title", "Date", "Where", "Pet", "Notes")
+            listOf("Title", "Date", "Pet", "Notes")
         } else {
             listOf("Title", "Pet", "Notes")
         }
@@ -103,18 +100,27 @@ class FormScheduleFragment() : Fragment() {
         // Pre-fill the fields if task data exists
         val inputValues = if (taskTitle != null) {
             if (isSchedule!!) {
-                listOf(taskTitle ?: "", taskDate ?: "", taskWhere ?: "", taskPet ?: "", taskNotes ?: "")
+                listOf(taskTitle ?: "",
+                        taskDate ?: "",
+                        taskPet ?: "",
+                        taskNotes ?: "")
             } else {
-                listOf(taskTitle ?: "", taskPet ?: "", taskNotes ?: "")
+                listOf(taskTitle ?: "",
+                        taskPet ?: "",
+                        taskNotes ?: "")
             }
         } else {
             List(composableInputs.size) { "" } // Empty strings for new entries
         }
 
-        val adapter = ComposableInputAdapter(composableInputs, inputValues)
+        if (inputValues.any { it.isNotEmpty() }) {
+            header.text = ""
+        }
+
+        val adapter = ComposableInputAdapter(composableInputs, inputValues, requireContext())
         recyclerView.adapter = adapter
 
-        submitButton = rootView.findViewById(R.id.create_account_btn);
+        submitButton = rootView.findViewById(R.id.submit_btn);
         submitButton.setOnClickListener {
             val taskData = mutableMapOf<String, String>()
 

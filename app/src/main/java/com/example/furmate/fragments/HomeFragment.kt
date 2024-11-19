@@ -1,4 +1,4 @@
-package com.example.furmate
+package com.example.furmate.fragments
 
 import android.os.Bundle
 import android.util.Log
@@ -11,6 +11,9 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.furmate.FormScheduleFragment
+import com.example.furmate.HomeActivity
+import com.example.furmate.R
 import com.example.furmate.models.Task
 import com.example.furmate.adapter.TaskAdapter
 import com.example.furmate.utils.MarginItemDecoration
@@ -102,7 +105,7 @@ class HomeFragment : Fragment() {
     // Function to open a task in detail (or open a form with pre-filled data)
     private fun openTaskDetail(task: Task) {
         // Handle task click and open the form with pre-filled task details
-        val fragment = FormScheduleFragment.newInstance(
+        val fragment = FormScheduleFragment.Companion.newInstance(
             isSchedule = true,
             title = task.name,
             date = task.time,
