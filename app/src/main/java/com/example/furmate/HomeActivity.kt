@@ -77,11 +77,11 @@ class HomeActivity : AppCompatActivity() {
                 }
                 R.id.calendar -> {
                     loadFragment(FragmentName.CALENDAR.name)
-                    hideFABs()
+                    showFABs()
                 }
                 R.id.pets -> {
                     loadFragment(FragmentName.PETS.name)
-                    hideFABs()
+                    showFABs()
                 }
             }
             true
@@ -122,19 +122,19 @@ class HomeActivity : AppCompatActivity() {
         }
     }
 
-    private fun handleFABClick() {
+    public fun handleFABClick() {
         mainFAB.setOnClickListener {
             toggleFABMenu()
         }
     }
 
-    private fun hideFABs() {
+    public fun hideFABs() {
         mainFAB.visibility = View.GONE
         scheduleFAB.visibility = View.GONE
         recordFAB.visibility = View.GONE
     }
 
-    private fun toggleFABMenu() {
+    public fun toggleFABMenu() {
         if (isFabMenuOpen) {
             closeFabMenu()
         } else {
@@ -142,7 +142,7 @@ class HomeActivity : AppCompatActivity() {
         }
     }
 
-    private fun openFabMenu() {
+    public fun openFabMenu() {
         val fadeThrough = MaterialFadeThrough().apply { duration = 300 }
         TransitionManager.beginDelayedTransition(findViewById(R.id.home_coord), fadeThrough)
         scheduleFAB.visibility = View.VISIBLE
@@ -150,7 +150,7 @@ class HomeActivity : AppCompatActivity() {
         isFabMenuOpen = true
     }
 
-    private fun closeFabMenu() {
+    public fun closeFabMenu() {
         val fadeThrough = MaterialFadeThrough().apply { duration = 300 }
         TransitionManager.beginDelayedTransition(findViewById(R.id.home_coord), fadeThrough)
         scheduleFAB.visibility = View.GONE

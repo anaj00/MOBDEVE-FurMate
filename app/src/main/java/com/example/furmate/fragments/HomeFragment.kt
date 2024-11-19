@@ -104,6 +104,10 @@ class HomeFragment : Fragment() {
 
     // Function to open a task in detail (or open a form with pre-filled data)
     private fun openTaskDetail(task: Task) {
+        // Ensure the parent activity is HomeActivity and hide FABs
+        (activity as? HomeActivity)?.hideFABs()
+
+
         // Handle task click and open the form with pre-filled task details
         val fragment = FormScheduleFragment.Companion.newInstance(
             isSchedule = true,

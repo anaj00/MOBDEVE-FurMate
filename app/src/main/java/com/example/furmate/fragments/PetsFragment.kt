@@ -4,8 +4,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.commit
 import androidx.gridlayout.widget.GridLayout
 import com.example.furmate.R
+import com.example.furmate.fragments.FormAddPetFragment
+import com.example.furmate.fragments.PetProfileFragment
 
 data class Pet(val name: String, val id: Int)
 
@@ -43,12 +46,48 @@ class PetsFragment : Fragment() {
                 petItemView.layoutParams = layoutParams
             }
 
+            petItemView.setOnClickListener(){
+                openPetProfile(pet)
+            }
+
             // Add the pet item to the GridLayout
             gridLayout.addView(petItemView)
         }
 
+        // Add a button to add a new pet
+        val petAdd = inflater.inflate(R.layout.button_addpet, gridLayout, false)
+        petAdd.post {
+            val width = petAdd.width
+            val layoutParams = petAdd.layoutParams
+            layoutParams.height = width
+            petAdd.layoutParams = layoutParams
+        }
+
+        petAdd.setOnClickListener {
+            openAddPetForm()
+        }
+
+        gridLayout.addView(petAdd)
 
         return rootView
+    }
+
+    private fun openPetProfile(pet: Pet) {
+        val fragment = PetProfileFragment.newInstance(pet.id)
+        parentFragmentManager.commit {
+            setReorderingAllowed(true)
+            replace(R.id.fragment_container, fragment)
+            addToBackStack(null)
+        }
+    }
+
+    private fun openAddPetForm() {
+        val fragment = FormAddPetFragment()
+        parentFragmentManager.commit {
+            setReorderingAllowed(true)
+            replace(R.id.fragment_container, fragment)
+            addToBackStack(null)
+        }
     }
 
     // Sample pets for demonstration
