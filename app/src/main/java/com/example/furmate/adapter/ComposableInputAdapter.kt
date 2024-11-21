@@ -1,14 +1,19 @@
 package com.example.furmate.adapter
 
 import android.app.DatePickerDialog
+import android.app.TimePickerDialog
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.example.furmate.R
+import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.timepicker.MaterialTimePicker
+import com.google.android.material.timepicker.TimeFormat
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -51,21 +56,45 @@ class ComposableInputAdapter(
     }
 
     private fun showDatePicker(inputField: TextInputEditText) {
-        val calendar = Calendar.getInstance()
+        val datePicker = MaterialDatePicker.Builder.datePicker()
+            .setTitleText("Select Date")
+            .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
+            .build()
 
-        DatePickerDialog(
-            context,
-            { _, year, month, dayOfMonth ->
-                val selectedDate = Calendar.getInstance()
-                selectedDate.set(year, month, dayOfMonth)
+        // Show the date picker
+        datePicker.show(
+            (context as AppCompatActivity).supportFragmentManager,
+            "MATERIAL_DATE_PICKER"
+        )
 
-                // Format date and set it to the input field
-                val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                inputField.setText(dateFormat.format(selectedDate.time))
-            },
-            calendar.get(Calendar.YEAR),
-            calendar.get(Calendar.MONTH),
-            calendar.get(Calendar.DAY_OF_MONTH)
-        ).show()
+        // Handle date selection
+        datePicker.addOnPositiveButtonClickListener { selection ->
+            val calendar = Calendar.getInstance()
+            calendar.timeInMillis = selection
+
+            // Step 2: Create MaterialTimePicker after selecting date
+            val timePicker = MaterialTimePicker.Builder()
+                .setTitleText("Select Time")
+                .setTimeFormat(TimeFormat.CLOCK_24H) // Use TimeFormat.CLOCK_12H for 12-hour format
+                .setHour(calendar.get(Calendar.HOUR_OF_DAY))
+                .setMinute(calendar.get(Calendar.MINUTE))
+                .build()
+
+            // Show the time picker
+            timePicker.show(
+                (context as AppCompatActivity).supportFragmentManager,
+                "MATERIAL_TIME_PICKER"
+            )
+
+            // Handle time selection
+            timePicker.addOnPositiveButtonClickListener {
+                calendar.set(Calendar.HOUR_OF_DAY, timePicker.hour)
+                calendar.set(Calendar.MINUTE, timePicker.minute)
+
+                // Format and display the selected date and time
+                val dateTimeFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+                inputField.setText(dateTimeFormat.format(calendar.time))
+            }
+        }
     }
 }

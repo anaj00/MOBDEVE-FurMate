@@ -62,6 +62,12 @@ dependencies {
     implementation(libs.firebase.ui.firestore)
     implementation(libs.google.firebase.auth)
 
+    // MDC (Material Design Components)
+    implementation("com.google.android.material:material:1.9.0")
+
     // Picasso
     implementation(libs.picasso)
+
+    // Markwon
+    implementation("io.noties.markwon:core:4.6.2")
 }
