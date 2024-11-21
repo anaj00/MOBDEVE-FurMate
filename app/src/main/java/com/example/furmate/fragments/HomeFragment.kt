@@ -67,6 +67,7 @@ class HomeFragment : Fragment() {
 
         return rootView
     }
+
     private fun fetchTodayTasks(todayRecyclerView: RecyclerView) {
         FirebaseFirestore.getInstance().collection("tasks")
             .addSnapshotListener { snapshot, error ->

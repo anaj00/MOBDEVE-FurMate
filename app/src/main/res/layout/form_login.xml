@@ -81,16 +81,6 @@
 
         </com.google.android.material.textfield.TextInputLayout>
 
-        <TextView
-            android:id="@+id/forgot_password_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="Forgot Password?"
-            android:textColor="@android:color/darker_gray"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/pet_div" />
-
         <Button
             android:id="@+id/sign_in_btn"
             style="@style/Widget.Material3.Button"
@@ -103,7 +93,7 @@
             app:cornerRadius="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/forgot_password_btn" />
+            app:layout_constraintTop_toBottomOf="@+id/pet_div" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/sign_in_with_divider"

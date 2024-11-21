@@ -6,10 +6,12 @@ import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 
 class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.base_login_reg)
 
@@ -20,8 +22,6 @@ class LoginActivity : AppCompatActivity() {
         handleLoginPage(formRegister, formLogin)
         handleCreateAccount()
         handleLogin()
-
-
     }
 
     private fun handleLogin() {
