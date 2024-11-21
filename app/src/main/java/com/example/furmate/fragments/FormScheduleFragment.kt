@@ -114,7 +114,7 @@ class FormScheduleFragment() : Fragment() {
         }
 
         if (inputValues.any { it.isNotEmpty() }) {
-            header.text = ""
+            header.visibility = View.GONE
         }
 
         val adapter = ComposableInputAdapter(composableInputs, inputValues, requireContext())
