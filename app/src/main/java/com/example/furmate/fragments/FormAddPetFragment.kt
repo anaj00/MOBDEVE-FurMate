@@ -24,8 +24,10 @@ import kotlin.collections.any
 
 class FormAddPetFragment : Fragment() {
     private var petName: String? = null
-    private var petAnimal: String? = null
+    private var petBreed: String? = null
+    private var petSex: String? = null
     private var petBirthday: String? = null
+    private var petWeight: String? = null
     private var petNotes: String? = null
 
     private lateinit var submitButton: Button
@@ -54,12 +56,18 @@ class FormAddPetFragment : Fragment() {
         petRepositoryAPI = PetRepositoryAPI(petCollection)
 
         val composableInputs = {
-            listOf("Name", "Animal", "Birthday", "Notes")
+            listOf("Name", "Breed", "Sex", "Birthday", "Weight", "Notes")
         }
 
         val inputValues = {
-            listOf(petName ?: "", petAnimal?: "", petBirthday?: "", petNotes?: "")
-
+            listOf(
+                petName ?: "",
+                petBreed ?: "",
+                petSex ?: "",
+                petBirthday ?: "",
+                petWeight ?: "",
+                petNotes ?: ""
+            )
         }
 
         val adapter = ComposableInputAdapter(composableInputs(), inputValues(), requireContext())
@@ -84,6 +92,7 @@ class FormAddPetFragment : Fragment() {
                 animal = petData["Animal"]!!,
                 birthday = petData["Birthday"]!!,
                 notes = petData["Notes"]!!
+
             )
 
             petRepositoryAPI.addPet(pet)
