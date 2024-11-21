@@ -86,7 +86,7 @@ class PetsFragment : Fragment() {
     }
 
     private fun openPetProfile(pet: Pet) {
-        val fragment = PetProfileFragment.newInstance(pet.id ?: -1)
+        val fragment = PetProfileFragment.newInstance(pet.id ?: "null")
         parentFragmentManager.commit {
             setReorderingAllowed(true)
             replace(R.id.fragment_container, fragment)

@@ -9,8 +9,7 @@ class PetRepositoryAPI (private val collection: CollectionReference) {
     fun addPet(pet: Pet) {
         Log.d("PetRepositoryAPI", "Attempting to add pet to Firestore")
         val document = collection.document()
-        val intId = document.id.hashCode()
-        val petWithId = pet.copy(id = intId)
+        val petWithId = pet.copy(id = document.id)
         document
             .set(petWithId)
             .addOnSuccessListener {
@@ -44,7 +43,7 @@ class PetRepositoryAPI (private val collection: CollectionReference) {
             .addOnSuccessListener { result ->
                 val pets = result.map { document ->
                     Pet(
-                        id = document.id.hashCode(),
+                        id = document.id,
                         name = document.getString("name") ?: "",
                         animal = document.getString("animal") ?: "",
                         birthday = document.getString("birthday") ?: "",
@@ -52,6 +51,28 @@ class PetRepositoryAPI (private val collection: CollectionReference) {
                     )
                 }
                 callback(pets, null)
+            }
+            .addOnFailureListener { e ->
+                callback(null, e)
+            }
+    }
+
+    fun getPetByID(collection: CollectionReference, petId: String, callback: (Pet?, Exception?) -> Unit) {
+        collection
+            .whereEqualTo("id", petId)
+            .get()
+            .addOnSuccessListener { result ->
+                val document = result.documents.firstOrNull()
+                val pet = document?.let {
+                    Pet(
+                        id = it.getString("id"),
+                        name = it.getString("name") ?: "Unknown",
+                        animal = it.getString("animal") ?: "Unknown",
+                        birthday = it.getString("birthday") ?: "Unkown",
+                        notes = it.getString("notes")
+                    )
+                }
+                callback(pet, null)
             }
             .addOnFailureListener { e ->
                 callback(null, e)
