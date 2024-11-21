@@ -24,6 +24,7 @@ import kotlin.collections.any
 
 class FormAddPetFragment : Fragment() {
     private var petName: String? = null
+    private var petImage: String? = null
     private var petBreed: String? = null
     private var petSex: String? = null
     private var petBirthday: String? = null
@@ -56,12 +57,13 @@ class FormAddPetFragment : Fragment() {
         petRepositoryAPI = PetRepositoryAPI(petCollection)
 
         val composableInputs = {
-            listOf("Name", "Breed", "Sex", "Birthday", "Weight", "Notes")
+            listOf("Name", "Profile Picture", "Breed", "Sex", "Birthday", "Weight", "Notes")
         }
 
         val inputValues = {
             listOf(
                 petName ?: "",
+                petImage ?: "",
                 petBreed ?: "",
                 petSex ?: "",
                 petBirthday ?: "",
@@ -77,7 +79,7 @@ class FormAddPetFragment : Fragment() {
         submitButton.setOnClickListener {
             val petData = mutableMapOf<String, String>()
 
-            for ( child in recyclerView.children) {
+            for (child in recyclerView.children) {
                 val holder = recyclerView.getChildViewHolder(child)
                 val key = holder.itemView.findViewById<TextInputLayout>(R.id.enter_hint_div).hint.toString()
                 val value = holder.itemView.findViewById<TextInputEditText>(R.id.input_field).text.toString()

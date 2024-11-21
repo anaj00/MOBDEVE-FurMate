@@ -3,6 +3,7 @@ package com.example.furmate.adapter
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,6 +19,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class ComposableInputAdapter(
+
     private val hints: List<String>,   // List of field hints (e.g., "Title", "Date")
     private val prefilledValues: List<String>,  // List of prefilled values (e.g., "Task 1", "2023-01-01")
     private val context: Context
@@ -43,12 +45,35 @@ class ComposableInputAdapter(
             holder.inputText.setText(prefilledValues[position])
         }
 
-        if (hint == "Date" || hint == "Birthday") {
-            holder.inputText.inputType = android.text.InputType.TYPE_NULL // Disable keyboard input
-            holder.inputText.setOnClickListener {
-                showDatePicker(holder.inputText)
+        when (hint) {
+            "Date", "Birthday" -> {
+                holder.inputText.inputType = android.text.InputType.TYPE_NULL // Disable keyboard input
+                holder.inputText.setOnClickListener {
+                    showDatePicker(holder.inputText)
+                }
+            }
+
+            "File", "Image", "Profile Picture" -> {
+                // Enable custom end icon
+                holder.inputLayout.endIconMode = TextInputLayout.END_ICON_CUSTOM
+                holder.inputLayout.setEndIconDrawable(com.google.firebase.appcheck.interop.R.drawable.common_google_signin_btn_text_light_normal) // TODO: Change image
+
+                // Handle click on the end icon
+                holder.inputLayout.setEndIconOnClickListener {
+                    openFileChooser(holder.inputText)
+                }
             }
         }
+    }
+
+    private fun openFileChooser(inputField: TextInputEditText) {
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+            type = "*/*" // Use "image/*" for images only
+            addCategory(Intent.CATEGORY_OPENABLE)
+        }
+
+        // Start the file chooser intent
+        (context as AppCompatActivity).startActivityForResult(intent, REQUEST_FILE_PICKER)
     }
 
     override fun getItemCount(): Int {
@@ -96,5 +121,9 @@ class ComposableInputAdapter(
                 inputField.setText(dateTimeFormat.format(calendar.time))
             }
         }
+    }
+
+    companion object {
+        const val REQUEST_FILE_PICKER = 1001
     }
 }
