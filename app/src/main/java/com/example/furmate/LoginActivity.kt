@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -41,9 +42,25 @@ class LoginActivity : AppCompatActivity() {
     private fun handleLogin() {
         val loginButton = findViewById<Button>(R.id.sign_in_btn)
         loginButton.setOnClickListener {
-            val intent = Intent(this, HomeActivity::class.java)
-            startActivity(intent)
-            finish() // Finish this activity so it cannot be accessed via back button
+            // prevent multiple clicks
+            loginButton.isEnabled = false
+
+            val email = formLogin.findViewById<TextInputEditText>(R.id.input_email).text.toString()
+            val password = formLogin.findViewById<TextInputEditText>(R.id.input_password).text.toString()
+
+            auth.signInWithEmailAndPassword(email, password).addOnSuccessListener {
+                val intent = Intent(this, HomeActivity::class.java)
+                startActivity(intent)
+                finish() // Finish this activity so it cannot be accessed via back button
+            }.addOnFailureListener { exception ->
+                if (exception is FirebaseAuthInvalidCredentialsException) {
+                    Toast.makeText(this, "Invalid credentials", Toast.LENGTH_SHORT).show()
+                } else {
+                    Log.e("Login failure", exception.toString())
+                }
+            }
+
+            loginButton.isEnabled = true
         }
     }
 
@@ -51,6 +68,9 @@ class LoginActivity : AppCompatActivity() {
         val createAccountButton = findViewById<Button>(R.id.create_account_btn)
 
         createAccountButton.setOnClickListener {
+            // disable button
+            createAccountButton.isEnabled = false
+
             // ensure that passwords are the same
             val username = formRegister.findViewById<TextInputEditText>(R.id.input_field).text.toString()
             val email = formRegister.findViewById<TextInputEditText>(R.id.input_email).text.toString()
@@ -92,6 +112,8 @@ class LoginActivity : AppCompatActivity() {
             }.addOnFailureListener {
                 Toast.makeText(this, "Failed to create user. Please try again", Toast.LENGTH_SHORT).show()
             }
+
+            createAccountButton.isEnabled = true
         }
     }
 
