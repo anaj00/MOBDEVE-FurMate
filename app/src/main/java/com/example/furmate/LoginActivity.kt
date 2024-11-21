@@ -44,23 +44,35 @@ class LoginActivity : AppCompatActivity() {
         loginButton.setOnClickListener {
             // prevent multiple clicks
             loginButton.isEnabled = false
-
-            val email = formLogin.findViewById<TextInputEditText>(R.id.input_email).text.toString()
-            val password = formLogin.findViewById<TextInputEditText>(R.id.input_password).text.toString()
-
-            auth.signInWithEmailAndPassword(email, password).addOnSuccessListener {
-                val intent = Intent(this, HomeActivity::class.java)
-                startActivity(intent)
-                finish() // Finish this activity so it cannot be accessed via back button
-            }.addOnFailureListener { exception ->
-                if (exception is FirebaseAuthInvalidCredentialsException) {
-                    Toast.makeText(this, "Invalid credentials", Toast.LENGTH_SHORT).show()
-                } else {
-                    Log.e("Login failure", exception.toString())
-                }
-            }
-
+            login()
             loginButton.isEnabled = true
+        }
+    }
+
+    private fun login() {
+        val email = formLogin.findViewById<TextInputEditText>(R.id.input_email).text.toString()
+        val password = formLogin.findViewById<TextInputEditText>(R.id.input_password).text.toString()
+
+        if (email.isBlank()) {
+            Toast.makeText(this, "Email is blank", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (password.isBlank()) {
+            Toast.makeText(this, "Password is blank", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        auth.signInWithEmailAndPassword(email, password).addOnSuccessListener {
+            val intent = Intent(this, HomeActivity::class.java)
+            startActivity(intent)
+            finish() // Finish this activity so it cannot be accessed via back button
+        }.addOnFailureListener { exception ->
+            if (exception is FirebaseAuthInvalidCredentialsException) {
+                Toast.makeText(this, "Invalid credentials", Toast.LENGTH_SHORT).show()
+            } else {
+                Log.e("Login failure", exception.toString())
+            }
         }
     }
 
@@ -68,52 +80,67 @@ class LoginActivity : AppCompatActivity() {
         val createAccountButton = findViewById<Button>(R.id.create_account_btn)
 
         createAccountButton.setOnClickListener {
-            // disable button
             createAccountButton.isEnabled = false
-
-            // ensure that passwords are the same
-            val username = formRegister.findViewById<TextInputEditText>(R.id.input_field).text.toString()
-            val email = formRegister.findViewById<TextInputEditText>(R.id.input_email).text.toString()
-            val password = formRegister.findViewById<TextInputEditText>(R.id.input_password).text.toString()
-            val confirmPassword = formRegister.findViewById<TextInputEditText>(R.id.input_password2).text.toString()
-
-            if (password != confirmPassword) {
-                Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            if (password.length < 8) {
-                Toast.makeText(this, "Password must be at least 8 characters", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            // create account
-            auth.createUserWithEmailAndPassword(email, password).addOnSuccessListener {
-                val user = auth.currentUser
-                if (user == null) {
-                    Toast.makeText(this, "Failed to log in. Please try again", Toast.LENGTH_SHORT).show()
-                    return@addOnSuccessListener
-                }
-
-                val db = Firebase.firestore
-                val data = hashMapOf(
-                    "username" to username,
-                    "uid" to user.uid
-                )
-                db.collection("Users").add(data)
-                    .addOnSuccessListener {
-                        val intent = Intent(this, HomeActivity::class.java)
-                        startActivity(intent)
-                        finish() // Finish this activity so it cannot be accessed via back button
-                    }
-                    .addOnFailureListener {exception ->
-                        Log.e("Firestore Error", exception.toString())
-                    }
-            }.addOnFailureListener {
-                Toast.makeText(this, "Failed to create user. Please try again", Toast.LENGTH_SHORT).show()
-            }
-
+            register()
             createAccountButton.isEnabled = true
+        }
+    }
+
+    private fun register() {
+        val username = formRegister.findViewById<TextInputEditText>(R.id.input_field).text.toString()
+        val email = formRegister.findViewById<TextInputEditText>(R.id.input_email).text.toString()
+        val password = formRegister.findViewById<TextInputEditText>(R.id.input_password).text.toString()
+        val confirmPassword = formRegister.findViewById<TextInputEditText>(R.id.input_password2).text.toString()
+
+        if (username.isBlank()) {
+            Toast.makeText(this, "Username is blank", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (email.isBlank()) {
+            Toast.makeText(this, "Email is blank", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (password.isBlank()) {
+            Toast.makeText(this, "Password is blank", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (password != confirmPassword) {
+            Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (password.length < 8) {
+            Toast.makeText(this, "Password must be at least 8 characters", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // create account
+        auth.createUserWithEmailAndPassword(email, password).addOnSuccessListener {
+            val user = auth.currentUser
+            if (user == null) {
+                Toast.makeText(this, "Failed to log in. Please try again", Toast.LENGTH_SHORT).show()
+                return@addOnSuccessListener
+            }
+
+            val db = Firebase.firestore
+            val data = hashMapOf(
+                "username" to username,
+                "uid" to user.uid
+            )
+            db.collection("Users").add(data)
+                .addOnSuccessListener {
+                    val intent = Intent(this, HomeActivity::class.java)
+                    startActivity(intent)
+                    finish() // Finish this activity so it cannot be accessed via back button
+                }
+                .addOnFailureListener {exception ->
+                    Log.e("Firestore Error", exception.toString())
+                }
+        }.addOnFailureListener {
+            Toast.makeText(this, "Failed to create user. Please try again", Toast.LENGTH_SHORT).show()
         }
     }
 
