@@ -3,22 +3,20 @@ package com.example.furmate.models
 data class Pet (
     val id: Int? = null,
     val name: String,
-    val breed: String,
-    val age: Int,
-    val weight: Double,
+    val animal: String,
+    val birthday: String,
     val notes: String?= null
 ) {
     constructor(
         name: String,
-        breed: String,
-        age: Int,
-        weight: Double,
+        animal: String,
+        birthday: String,
+        notes: String ?= null
     ) : this(
         null,
         name,
-        breed,
-        age,
-        weight,
-        null
+        animal,
+        birthday,
+        notes
     )
 }
