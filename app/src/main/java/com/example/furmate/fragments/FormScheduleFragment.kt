@@ -35,9 +35,11 @@ class FormScheduleFragment() : Fragment() {
 
     // Firestore Collections
     private lateinit var scheduleCollection: CollectionReference
+    private lateinit var recordCollection: CollectionReference
 
     // APIs
     private lateinit var taskRepositoryAPI: TaskRepositoryAPI
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -83,6 +85,8 @@ class FormScheduleFragment() : Fragment() {
             taskRepositoryAPI = TaskRepositoryAPI(scheduleCollection)
             header.text = "Add a new schedule"
         } else {
+            recordCollection = firestore.collection("Record")
+            taskRepositoryAPI = TaskRepositoryAPI(recordCollection)
             header.text = "Add a new record"
         }
 
@@ -119,19 +123,15 @@ class FormScheduleFragment() : Fragment() {
         submitButton.setOnClickListener {
             val taskData = mutableMapOf<String, String>()
 
-            val ret = Bundle()
-
             for (child in recyclerView.children) {
                 val holder = recyclerView.getChildViewHolder(child)
                 val key = holder.itemView.findViewById<TextInputLayout>(R.id.enter_hint_div).hint.toString()
                 val value = holder.itemView.findViewById<TextInputEditText>(R.id.input_field).text.toString()
 
-                val formattedKey = "KEY_" + key.uppercase()
                 taskData[key] = value
             }
 
             // Test for differentiating the return value
-
             Log.d("FormScheduleFragment", "onCreateView: $taskData")
 
             if (isSchedule!!) {
@@ -145,6 +145,12 @@ class FormScheduleFragment() : Fragment() {
                 taskRepositoryAPI.addTask(task)
             } else {
                 // Add the record to the Firestore database
+                val record = Task(
+                    name = taskData["Title"]!!,
+                    petName = taskData["Pet"]!!,
+                    notes = taskData["Notes"]
+                )
+                taskRepositoryAPI.addTask(record)
                 Log.d("FormScheduleFragment", "Record submitted")
             }
 

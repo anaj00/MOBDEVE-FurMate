@@ -18,12 +18,15 @@ import com.example.furmate.models.Task
 import com.example.furmate.adapter.TaskAdapter
 import com.example.furmate.utils.MarginItemDecoration
 import com.google.firebase.firestore.FirebaseFirestore
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 
 class HomeFragment : Fragment() {
     private lateinit var todayTasks: ArrayList<Task>
     private lateinit var upcomingTasks: ArrayList<Task>
-
+    private val todayDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -69,7 +72,9 @@ class HomeFragment : Fragment() {
     }
 
     private fun fetchTodayTasks(todayRecyclerView: RecyclerView) {
-        FirebaseFirestore.getInstance().collection("Schedule")
+        FirebaseFirestore.getInstance()
+            .collection("Schedule")
+            .whereEqualTo("date", todayDate)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
                     Log.w("HomeFragment", "Listen failed.", error)
@@ -87,18 +92,22 @@ class HomeFragment : Fragment() {
     }
 
     private fun fetchUpcomingTasks(recyclerView: RecyclerView) {
-        FirebaseFirestore.getInstance().collection("tasks")
-            .whereGreaterThan("date", "today") // Adjust query for "Upcoming"
+        Log.d("Upcoming task", "Fetching upcoming tasks")
+        FirebaseFirestore.getInstance().collection("Schedule")
+            .whereGreaterThan("date", todayDate) // Fetch tasks with dates after today
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
-                    Log.e("HomeFragment", "Error fetching upcoming tasks", error)
+                    Log.e("Upcoming task", "Error fetching upcoming tasks", error)
                     return@addSnapshotListener
                 }
-                if (snapshot != null) {
+                if (snapshot != null && !snapshot.isEmpty) {
                     val tasks = snapshot.documents.mapNotNull { it.toObject(Task::class.java) }
                     upcomingTasks.clear()
                     upcomingTasks.addAll(tasks)
                     recyclerView.adapter?.notifyDataSetChanged()
+                    Log.d("Upcoming task", "in snapshot != null")
+                } else {
+                    Log.d("Upcoming task", "No upcoming tasks found in the collection.")
                 }
             }
     }
