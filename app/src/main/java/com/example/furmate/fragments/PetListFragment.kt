@@ -42,7 +42,20 @@ class PetsFragment : Fragment() {
                 Log.e("PetsFragment", "Error fetching pets: $error")
                 return@getAllPets
             }
+            // Add a button to add a new pet
+            val petAdd = inflater.inflate(R.layout.button_addpet, gridLayout, false)
+            petAdd.post {
+                val width = petAdd.width
+                val layoutParams = petAdd.layoutParams
+                layoutParams.height = width
+                petAdd.layoutParams = layoutParams
+            }
 
+            petAdd.setOnClickListener {
+                openAddPetForm()
+            }
+
+            gridLayout.addView(petAdd)
             // Dynamically add pet items to GridLayout
             pets?.let { petList ->
                 for (pet in petList) {
@@ -69,21 +82,6 @@ class PetsFragment : Fragment() {
                 }
             }
         }
-        // Add a button to add a new pet
-        val petAdd = inflater.inflate(R.layout.button_addpet, gridLayout, false)
-        petAdd.post {
-            val width = petAdd.width
-            val layoutParams = petAdd.layoutParams
-            layoutParams.height = width
-            petAdd.layoutParams = layoutParams
-        }
-
-        petAdd.setOnClickListener {
-            openAddPetForm()
-        }
-
-        gridLayout.addView(petAdd)
-
         return rootView
     }
 
