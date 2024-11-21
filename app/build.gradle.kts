@@ -7,12 +7,12 @@ plugins {
 
 android {
     namespace = "com.example.furmate"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.furmate"
         minSdk = 24
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -67,4 +67,11 @@ dependencies {
 
     // Picasso
     implementation(libs.picasso)
+
+    // Android Credential Manager (For Google login)
+    implementation(libs.androidx.credentials)
+
+    // Google identity library
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
+
 }

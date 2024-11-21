@@ -12,7 +12,12 @@
           "package_name": "com.example.furmate"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "756574244758-og6viefl3lfkt1dhmn5hcd1bramq1or6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCIiJxHK48I-1zYYo8gIQwQkBzSwq1_wmI"
@@ -20,7 +25,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "756574244758-og6viefl3lfkt1dhmn5hcd1bramq1or6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

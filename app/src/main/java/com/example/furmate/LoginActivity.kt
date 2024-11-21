@@ -9,8 +9,8 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.material.textfield.TextInputEditText
-import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.ktx.auth
@@ -18,6 +18,9 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
 class LoginActivity : AppCompatActivity() {
+    private val GOOGLE_ANDROID_CLIENT_ID = "5695861005-kihkqrp31tltjh6pkkdrc2sfas3g74nc.apps.googleusercontent.com"
+    private val GOOGLE_WEB_CLIENT_ID = "5695861005-97f1jrsg9v08f2hib1d5o1td0gfo98bl.apps.googleusercontent.com"
+
     private lateinit var auth: FirebaseAuth
     private lateinit var formRegister: View
     private lateinit var formLogin: View
@@ -75,6 +78,14 @@ class LoginActivity : AppCompatActivity() {
             }
         }
     }
+
+    private fun handleGoogleLogin() {
+        val signInWithGoogleOption = GetSignInWithGoogleOption.Builder(GOOGLE_ANDROID_CLIENT_ID)
+            .build()
+
+
+    }
+
 
     private fun handleCreateAccount() {
         val createAccountButton = findViewById<Button>(R.id.create_account_btn)

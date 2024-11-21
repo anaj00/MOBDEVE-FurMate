@@ -1,11 +1,13 @@
 [versions]
 agp = "8.7.1"
+credentials = "1.5.0-beta01"
 firebaseBom = "33.5.1"
 firebaseFirestore = "24.9.1"
 firebaseStorage = "21.0.1"
 firebaseUiFirestore = "8.0.2"
 firebaseUiStorage = "8.0.2"
 fragmentKtx = "1.8.5"
+googleid = "<latest version>"
 kotlin = "1.9.24"
 coreKtx = "1.13.1"
 junit = "4.13.2"
@@ -22,6 +24,7 @@ picasso = "2.8"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-credentials = { module = "androidx.credentials:credentials", version.ref = "credentials" }
 androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragmentKtx" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
@@ -30,6 +33,7 @@ firebase-storage = { module = "com.google.firebase:firebase-storage", version.re
 firebase-ui-firestore = { module = "com.firebaseui:firebase-ui-firestore", version.ref = "firebaseUiFirestore" }
 firebase-ui-storage = { module = "com.firebaseui:firebase-ui-storage", version.ref = "firebaseUiStorage" }
 google-firebase-auth = { module = "com.google.firebase:firebase-auth" }
+googleid = { module = "com.google.android.libraries.identity.googleid:googleid", version.ref = "googleid" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
