@@ -38,8 +38,7 @@ class ComposableInputAdapter(
             holder.inputText.setText(prefilledValues[position])
         }
 
-        // Attach DatePickerDialog if the field is "Date"
-        if (hint == "Date") {
+        if (hint == "Date" || hint == "Birthday") {
             holder.inputText.inputType = android.text.InputType.TYPE_NULL // Disable keyboard input
             holder.inputText.setOnClickListener {
                 showDatePicker(holder.inputText)
