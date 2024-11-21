@@ -8,9 +8,10 @@ class TaskRepositoryAPI (private val collection: CollectionReference) {
     // Add task to database
     fun addTask(task: Task) {
         Log.d("TaskRepositoryAPI", "Attempting to add task to Firestore")
-
+        val document = collection.document()
+        val taskWithId = task.copy(id = document.id)
         collection
-            .add(task)
+            .add(taskWithId)
             .addOnSuccessListener { documentReference ->
                 Log.d("FireStore,", "Task added with ID: ${documentReference.id}")
 

@@ -60,7 +60,7 @@ class HomeFragment : Fragment() {
             val where = bundle.getString("KEY_WHERE")!!
 
             // TODO: add the rest of the bundle values
-            todayTasks.add(Task(title, date, where, pet, notes))
+            todayTasks.add(Task(null, title, date, pet, notes))
             (todayRecyclerView.adapter as RecyclerView.Adapter)
                 .notifyItemInserted(todayTasks.size - 1)
         }
@@ -69,7 +69,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun fetchTodayTasks(todayRecyclerView: RecyclerView) {
-        FirebaseFirestore.getInstance().collection("tasks")
+        FirebaseFirestore.getInstance().collection("Schedule")
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
                     Log.w("HomeFragment", "Listen failed.", error)
@@ -113,7 +113,7 @@ class HomeFragment : Fragment() {
         val fragment = FormScheduleFragment.Companion.newInstance(
             isSchedule = true,
             title = task.name,
-            date = task.time,
+            date = task.date,
             where = "Location",  // Add relevant data here
             pet = "Pet Name",     // Add relevant data here
             notes = "Notes"       // Add relevant data here
@@ -128,18 +128,18 @@ class HomeFragment : Fragment() {
     // Function to get a list of sample tasks
     private fun getSampleTasks(): List<Task> {
         return listOf(
-            Task("Walk the Dog", "8:30 AM", "Park", "boopie"),
-            Task("Feed the Cat", "9:00 AM", "Home", "baabaa"),
-            Task("Take a Bath", "10:00 AM", "Home", "booboo"),
-            Task("Walk the Dog", "8:30 AM", "Park", "boopie"),
-            Task("Feed the Cat", "9:00 AM", "Home", "baabaa"),
-            Task("Take a Bath", "10:00 AM", "Home", "booboo"),
-            Task("Walk the Dog", "8:30 AM", "Park", "boopie"),
-            Task("Feed the Cat", "9:00 AM", "Home", "baabaa"),
-            Task("Take a Bath", "10:00 AM", "Home", "booboo"),
-            Task("Walk the Dog", "8:30 AM", "Park", "boopie"),
-            Task("Feed the Cat", "9:00 AM", "Home", "baabaa"),
-            Task("Take a Bath", "10:00 AM", "Home", "booboo"),
+            Task(null, "Walk the Dog", "8:30 AM","boopie"),
+            Task(null, "Feed the Cat", "9:00 AM", "baabaa"),
+            Task(null, "Take a Bath", "10:00 AM", "booboo"),
+            Task(null, "Walk the Dog", "8:30 AM", "boopie"),
+            Task(null, "Feed the Cat", "9:00 AM", "baabaa"),
+            Task(null, "Take a Bath", "10:00 AM", "booboo"),
+            Task(null, "Walk the Dog", "8:30 AM", "boopie"),
+            Task(null, "Feed the Cat", "9:00 AM", "baabaa"),
+            Task(null, "Take a Bath", "10:00 AM", "booboo"),
+            Task(null, "Walk the Dog", "8:30 AM", "boopie"),
+            Task(null, "Feed the Cat", "9:00 AM", "baabaa"),
+            Task(null, "Take a Bath", "10:00 AM", "booboo"),
         )
     }
 
@@ -167,7 +167,7 @@ class HomeFragment : Fragment() {
         val taskTitleView = view.findViewById<TextView>(R.id.task_title)
         val taskTimeView = view.findViewById<TextView>(R.id.task_time)
         taskTitleView.text = task.name
-        taskTimeView.text = task.time
+        taskTimeView.text = task.date
     }
 
     // Function to add the task view to the parent layout with appropriate constraints

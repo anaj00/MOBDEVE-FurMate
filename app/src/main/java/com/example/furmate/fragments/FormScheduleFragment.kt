@@ -86,11 +86,6 @@ class FormScheduleFragment() : Fragment() {
             header.text = "Add a new record"
         }
 
-//        val backButton = rootView.findViewById<Button>(R.id.back_btn)
-//        backButton.setOnClickListener {
-//            activity?.onBackPressed() // Go back to the previous fragment
-//        }
-
         val composableInputs = if (isSchedule!!) {
             listOf("Title", "Date", "Pet", "Notes")
         } else {
@@ -143,8 +138,7 @@ class FormScheduleFragment() : Fragment() {
                 // Add the task to the Firestore database
                  val task = Task(
                      name = taskData["Title"]!!,
-                     time = taskData["Date"]!!,
-                     location = taskData["Where"]!!,
+                     date = taskData["Date"]!!,
                      petName = taskData["Pet"]!!,
                      notes = taskData["Notes"]
                  )

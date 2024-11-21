@@ -29,7 +29,7 @@ class TaskAdapter(
 
         // Set task data here
         holder.itemView.findViewById<TextView>(R.id.task_title).text = task.name
-        holder.itemView.findViewById<TextView>(R.id.task_time).text = task.time
+        holder.itemView.findViewById<TextView>(R.id.task_time).text = task.date
 
         // Handle card click to open the form with pre-filled values
         holder.taskCard.setOnClickListener {

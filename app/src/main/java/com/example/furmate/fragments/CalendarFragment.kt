@@ -47,7 +47,7 @@ class CalendarFragment : Fragment() {
                 val fragment = FormScheduleFragment.newInstance(
                     isSchedule = true,
                     title = task.name,
-                    date = task.time,
+                    date = task.date,
                     where = "Unknown", // Add appropriate data
                     pet = "Unknown",
                     notes = "Some notes"
