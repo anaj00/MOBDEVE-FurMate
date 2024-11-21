@@ -55,6 +55,7 @@ class HomeActivity : AppCompatActivity() {
         testSendPasswordResetEmail("justinlim4916@gmail.com")
         */
 
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.base_home)
 
