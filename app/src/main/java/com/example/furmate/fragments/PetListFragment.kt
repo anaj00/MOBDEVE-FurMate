@@ -1,4 +1,5 @@
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -7,12 +8,14 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.gridlayout.widget.GridLayout
 import com.example.furmate.R
+import com.example.furmate.db.PetRepositoryAPI
 import com.example.furmate.fragments.FormAddPetFragment
 import com.example.furmate.fragments.PetProfileFragment
-
-data class Pet(val name: String, val id: Int)
+import com.google.firebase.firestore.FirebaseFirestore
+import com.example.furmate.models.Pet
 
 class PetsFragment : Fragment() {
+    private lateinit var petRepositoryAPI: PetRepositoryAPI
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -27,33 +30,45 @@ class PetsFragment : Fragment() {
         // Set the column count for a two-column layout
         gridLayout.columnCount = 2
 
+        val firestore = FirebaseFirestore.getInstance()
+        val petCollection = firestore.collection("Pet") // Adjust collection name as needed
+        petRepositoryAPI = PetRepositoryAPI(petCollection)
+
+
+        // Get all pets from the database
         // Set up the list of pets
-        val pets = getSamplePets()
-
-        // Dynamically add pet items to GridLayout
-        for (pet in pets) {
-            val petItemView = inflater.inflate(R.layout.composable_pet_button, gridLayout, false)
-
-            // Set the pet name
-            val petNameView = petItemView.findViewById<TextView>(R.id.pet_name)
-            petNameView.text = pet.name
-
-            // Measure the width of the card to set the height equal to the width (for a square appearance)
-            petItemView.post {
-                val width = petItemView.width
-                val layoutParams = petItemView.layoutParams
-                layoutParams.height = width
-                petItemView.layoutParams = layoutParams
+        getAllPets { pets, error ->
+            if (error != null) {
+                Log.e("PetsFragment", "Error fetching pets: $error")
+                return@getAllPets
             }
 
-            petItemView.setOnClickListener(){
-                openPetProfile(pet)
-            }
+            // Dynamically add pet items to GridLayout
+            pets?.let { petList ->
+                for (pet in petList) {
+                    val petItemView = inflater.inflate(R.layout.composable_pet_button, gridLayout, false)
 
-            // Add the pet item to the GridLayout
-            gridLayout.addView(petItemView)
+                    // Set the pet name
+                    val petNameView = petItemView.findViewById<TextView>(R.id.pet_name)
+                    petNameView.text = pet.name
+
+                    // Measure the width of the card to set the height equal to the width (for a square appearance)
+                    petItemView.post {
+                        val width = petItemView.width
+                        val layoutParams = petItemView.layoutParams
+                        layoutParams.height = width
+                        petItemView.layoutParams = layoutParams
+                    }
+
+                    petItemView.setOnClickListener {
+                        openPetProfile(pet)
+                    }
+
+                    // Add the pet item to the GridLayout
+                    gridLayout.addView(petItemView)
+                }
+            }
         }
-
         // Add a button to add a new pet
         val petAdd = inflater.inflate(R.layout.button_addpet, gridLayout, false)
         petAdd.post {
@@ -73,7 +88,7 @@ class PetsFragment : Fragment() {
     }
 
     private fun openPetProfile(pet: Pet) {
-        val fragment = PetProfileFragment.newInstance(pet.id)
+        val fragment = PetProfileFragment.newInstance(pet.id ?: -1)
         parentFragmentManager.commit {
             setReorderingAllowed(true)
             replace(R.id.fragment_container, fragment)
@@ -91,14 +106,14 @@ class PetsFragment : Fragment() {
     }
 
     // Sample pets for demonstration
-    private fun getSamplePets(): List<Pet> {
-        return listOf(
-            Pet("Moo Deng", 123),
-            Pet("Booboo", 124),
-            Pet("Baabaa", 125),
-            Pet("Dodo", 126),
-            Pet("Milo", 127),
-            Pet("Fido", 128)
-        )
+    private fun getAllPets(callback: (List<Pet>?, Exception?) -> Unit) {
+        petRepositoryAPI.getAllPets { pets, error ->
+            if (error != null) {
+                callback(null, error) // Pass the error to the callback
+            } else {
+                callback(pets, null) // Pass the fetched pets to the callback
+            }
+        }
     }
+
 }

@@ -87,6 +87,7 @@ class FormAddPetFragment : Fragment() {
             )
 
             petRepositoryAPI.addPet(pet)
+            requireActivity().onBackPressedDispatcher.onBackPressed()
         }
         return rootView
     }
