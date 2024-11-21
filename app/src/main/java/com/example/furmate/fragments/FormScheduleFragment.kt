@@ -34,7 +34,7 @@ class FormScheduleFragment() : Fragment() {
     private lateinit var recyclerView: RecyclerView
 
     // Firestore Collections
-    private lateinit var taskCollection: CollectionReference
+    private lateinit var scheduleCollection: CollectionReference
 
     // APIs
     private lateinit var taskRepositoryAPI: TaskRepositoryAPI
@@ -79,8 +79,8 @@ class FormScheduleFragment() : Fragment() {
         val header = rootView.findViewById<TextView>(R.id.form_header)
         if (isSchedule!!) {
             // Initialize the Firestore collection
-            taskCollection = firestore.collection("tasks")
-            taskRepositoryAPI = TaskRepositoryAPI(taskCollection)
+            scheduleCollection = firestore.collection("Schedule")
+            taskRepositoryAPI = TaskRepositoryAPI(scheduleCollection)
             header.text = "Add a new schedule"
         } else {
             header.text = "Add a new record"
