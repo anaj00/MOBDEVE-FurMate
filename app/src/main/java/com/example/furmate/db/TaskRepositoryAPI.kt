@@ -20,5 +20,18 @@ class TaskRepositoryAPI (private val collection: CollectionReference) {
                 Log.e("FireStore", "Error adding task", e)
             }
     }
+
+    fun getTasksByDate(date: String, callback: (List<Task>?, Exception?) -> Unit) {
+        collection
+            .whereEqualTo("date", date)
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                val tasks = querySnapshot.toObjects(Task::class.java)
+                callback(tasks, null) // Pass tasks to callback
+            }
+            .addOnFailureListener { exception ->
+                callback(null, exception) // Pass exception to callback
+            }
+    }
 }
 
