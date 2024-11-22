@@ -68,10 +68,6 @@ dependencies {
     // Picasso
     implementation(libs.picasso)
 
-    // Android Credential Manager (For Google login)
-    implementation(libs.androidx.credentials)
-
     // Google identity library
-    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
-
+    implementation("com.google.android.gms:play-services-auth:21.2.0")
 }

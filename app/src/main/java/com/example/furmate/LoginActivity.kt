@@ -9,17 +9,33 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
-import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.tasks.Task
+import com.google.android.material.card.MaterialCardView
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
+
 class LoginActivity : AppCompatActivity() {
     private val GOOGLE_ANDROID_CLIENT_ID = "5695861005-kihkqrp31tltjh6pkkdrc2sfas3g74nc.apps.googleusercontent.com"
     private val GOOGLE_WEB_CLIENT_ID = "5695861005-97f1jrsg9v08f2hib1d5o1td0gfo98bl.apps.googleusercontent.com"
+    private val RC_SIGN_IN = 1
+
+    private val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+        .requestEmail()
+        .requestIdToken(GOOGLE_WEB_CLIENT_ID)
+        .build()
+
+    private lateinit var googleSignInClient: GoogleSignInClient
 
     private lateinit var auth: FirebaseAuth
     private lateinit var formRegister: View
@@ -33,13 +49,17 @@ class LoginActivity : AppCompatActivity() {
         // initialize FirebaseAuth object
         auth = Firebase.auth
 
+        googleSignInClient = GoogleSignIn.getClient(this, gso);
+
         formRegister = findViewById<View>(R.id.form_register)
         formLogin = findViewById<View>(R.id.form_login)
 
         handleCreateAccountPage(formRegister, formLogin)
         handleLoginPage(formRegister, formLogin)
+
         handleCreateAccount()
         handleLogin()
+        handleGoogleLogin()
     }
 
     private fun handleLogin() {
@@ -67,9 +87,7 @@ class LoginActivity : AppCompatActivity() {
         }
 
         auth.signInWithEmailAndPassword(email, password).addOnSuccessListener {
-            val intent = Intent(this, HomeActivity::class.java)
-            startActivity(intent)
-            finish() // Finish this activity so it cannot be accessed via back button
+            goToHomeScreen()
         }.addOnFailureListener { exception ->
             if (exception is FirebaseAuthInvalidCredentialsException) {
                 Toast.makeText(this, "Invalid credentials", Toast.LENGTH_SHORT).show()
@@ -80,12 +98,47 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun handleGoogleLogin() {
-        val signInWithGoogleOption = GetSignInWithGoogleOption.Builder(GOOGLE_ANDROID_CLIENT_ID)
-            .build()
-
-
+        val googleLoginButton = findViewById<MaterialCardView>(R.id.google_btn)
+        googleLoginButton.setOnClickListener {
+            googleLoginButton.isEnabled = false
+            loginGoogle()
+            googleLoginButton.isEnabled = true
+        }
     }
 
+    private fun loginGoogle() {
+        val signInIntent: Intent = googleSignInClient.signInIntent
+        startActivityForResult(signInIntent, RC_SIGN_IN)
+    }
+
+    public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        // google login is complete
+        if (requestCode == RC_SIGN_IN) {
+            // The Task returned from this call is always completed, no need to attach
+            // a listener.
+            val task: Task<GoogleSignInAccount> = GoogleSignIn.getSignedInAccountFromIntent(data)
+            try {
+                val account: GoogleSignInAccount = task.getResult(ApiException::class.java)
+                val firebaseCredential = GoogleAuthProvider.getCredential(account.idToken, null)
+                auth.signInWithCredential(firebaseCredential)
+                    .addOnSuccessListener {
+                        goToHomeScreen()
+                    }
+                    .addOnFailureListener {e ->
+                        Log.d("Google Login Error", e.toString())
+                    }
+
+                // TEMP
+                googleSignInClient.signOut()
+            } catch (e: ApiException) {
+                // The ApiException status code indicates the detailed failure reason.
+                // Please refer to the GoogleSignInStatusCodes class reference for more information.
+                Log.w("Google Login Error", e.toString());
+            }
+        }
+    }
 
     private fun handleCreateAccount() {
         val createAccountButton = findViewById<Button>(R.id.create_account_btn)
@@ -143,9 +196,7 @@ class LoginActivity : AppCompatActivity() {
             )
             db.collection("Users").add(data)
                 .addOnSuccessListener {
-                    val intent = Intent(this, HomeActivity::class.java)
-                    startActivity(intent)
-                    finish() // Finish this activity so it cannot be accessed via back button
+                    goToHomeScreen()
                 }
                 .addOnFailureListener {exception ->
                     Log.e("Firestore Error", exception.toString())
@@ -171,5 +222,11 @@ class LoginActivity : AppCompatActivity() {
             formRegister.visibility = View.GONE
             formLogin.visibility = View.VISIBLE
         }
+    }
+
+    private fun goToHomeScreen() {
+        val intent = Intent(this, HomeActivity::class.java)
+        startActivity(intent)
+        finish() // Finish this activity so it cannot be accessed via back button
     }
 }
