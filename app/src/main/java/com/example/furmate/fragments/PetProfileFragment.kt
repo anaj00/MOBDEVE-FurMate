@@ -82,7 +82,7 @@ class PetProfileFragment : Fragment() {
                 return when (position) {
                     0 -> PetProfileHomeFragment.newInstance()
                     1 -> PetRecordsFragment.newInstance()
-                    2 -> PetScheduleFragment.newInstance()
+                    2 -> PetScheduleFragment.newInstance(petName = petNameTextView.text.toString())
                     else -> throw IllegalArgumentException("Invalid position")
                 }
             }
