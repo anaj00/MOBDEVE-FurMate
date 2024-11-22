@@ -81,21 +81,12 @@ class PetScheduleFragment : Fragment() {
         return dateFormat.format(date)
     }
 
-    // Sample tasks
-    private fun getSampleTasks(): List<Task> {
-        return listOf(
-            Task("Walk the Dog", "8:30 AM", "Park", "boopie"),
-            Task("Feed the Cat", "9:00 AM", "Home", "baabaa"),
-            Task("Take a Bath", "10:00 AM", "Home", "booboo")
-        )
-    }
-
     private fun populateTasks(date: Date, recyclerView: RecyclerView) {
         val queryDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(date)
 
         getAllTasks(queryDate) { tasks, error ->
             if (error != null) {
-                Log.e("CalendarFragment", "Error fetching tasks: $error")
+                Log.e("PetScheduleFragment", "Error fetching tasks: $error")
                 return@getAllTasks
             }
             recyclerView.adapter = TaskAdapter(tasks ?: emptyList()) { task ->
@@ -107,13 +98,11 @@ class PetScheduleFragment : Fragment() {
                     pet = task.petName,
                     notes = task.notes
                 )
-                parentFragmentManager.beginTransaction()
-                    .replace(R.id.fragment_container, fragment)
-                    .addToBackStack(null)
-                    .commit()
+                (requireActivity() as FragmentNavigator).navigateToFragment(fragment)
             }
         }
     }
+
 
     private fun getAllTasks(date: String, callback: (List<Task>?, Exception?) -> Unit) {
         // Implement fetching tasks from the database

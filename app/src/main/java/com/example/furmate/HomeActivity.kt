@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.transition.TransitionManager
 import com.example.furmate.fragments.HomeFragment
+import com.example.furmate.FragmentNavigator
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -27,7 +28,7 @@ import java.io.ByteArrayOutputStream
 import java.util.concurrent.Executors
 
 
-class HomeActivity : AppCompatActivity() {
+class HomeActivity : AppCompatActivity(), FragmentNavigator {
     companion object {
         enum class FragmentName {
             HOME, CALENDAR, PETS
@@ -101,6 +102,15 @@ class HomeActivity : AppCompatActivity() {
             openFormSchedule(isSchedule = false)
         }
 
+
+    }
+
+    override fun navigateToFragment(fragment: Fragment) {
+        supportFragmentManager.commit {
+            setReorderingAllowed(true)
+            replace(R.id.fragment_container, fragment)
+            addToBackStack(null)
+        }
     }
 
     private fun openFormSchedule(
