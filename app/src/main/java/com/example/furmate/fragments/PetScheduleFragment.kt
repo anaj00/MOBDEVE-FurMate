@@ -16,18 +16,36 @@ import com.example.furmate.db.TaskRepositoryAPI
 import com.example.furmate.models.Task
 import com.example.furmate.utils.MarginItemDecoration
 import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 class PetScheduleFragment : Fragment() {
+    private lateinit var adapter: TaskAdapter
+    private lateinit var scheduleCollection: CollectionReference
+    private lateinit var taskRepositoryAPI: TaskRepositoryAPI
+    private var snapshotListenerRegistration: ListenerRegistration? = null
+    private var petName: String? = null
+
     companion object {
-        fun newInstance(): PetScheduleFragment {
-            return PetScheduleFragment()
+        fun newInstance(petName: String): PetScheduleFragment {
+            val fragment = PetScheduleFragment()
+            val args = Bundle()
+            args.putString("petName", petName) // Pass petName in the Bundle
+            fragment.arguments = args
+            return fragment
         }
     }
-    private  lateinit var taskRepositoryAPI: TaskRepositoryAPI
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        arguments?.let {
+            petName = it.getString("petName")
+        }
+    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -37,15 +55,35 @@ class PetScheduleFragment : Fragment() {
         // Date Picker trigger view
         val datePickerTrigger = rootView.findViewById<TextView>(R.id.date_picker_trigger)
         val dateHeader = rootView.findViewById<TextView>(R.id.date_header)
-
         // Initialize API collection
         val firestore = FirebaseFirestore.getInstance()
-        val scheduleCollection = firestore.collection("Schedule")
+        scheduleCollection = firestore.collection("Schedule")
         taskRepositoryAPI = TaskRepositoryAPI(scheduleCollection)
+
+
+        adapter = TaskAdapter(mutableListOf()) { task ->
+            val fragment = FormScheduleFragment.newInstance(
+                isSchedule = true,
+                title = task.name,
+                date = task.date,
+                where = "Unknown",
+                pet = task.petName,
+                notes = task.notes,
+                documentId = task.id
+            )
+            (requireActivity() as FragmentNavigator).navigateToFragment(fragment)
+        }
+        // Set up RecyclerView for tasks
+        val dateRecyclerView = rootView.findViewById<RecyclerView>(R.id.day_listview)
+        dateRecyclerView.layoutManager = LinearLayoutManager(context)
+        dateRecyclerView.addItemDecoration(MarginItemDecoration(16))
+        dateRecyclerView.adapter = adapter
 
         // Set the initial date in the header
         val initialDate = Date()
         dateHeader.text = getFormattedDate(initialDate)
+
+        observeTasksByDateAndPet(initialDate, petName ?: "")
 
         // Set up the MaterialDatePicker
         val datePicker = MaterialDatePicker.Builder.datePicker()
@@ -57,19 +95,11 @@ class PetScheduleFragment : Fragment() {
             datePicker.show(parentFragmentManager, "MATERIAL_DATE_PICKER")
         }
 
-        // Set up RecyclerView for tasks
-        val dateRecyclerView = rootView.findViewById<RecyclerView>(R.id.day_listview)
-        dateRecyclerView.layoutManager = LinearLayoutManager(context)
-        dateRecyclerView.addItemDecoration(MarginItemDecoration(16))
-
-        // Load initial tasks for the date
-        populateTasks(initialDate, dateRecyclerView)
-
         // Update header when a date is selected
         datePicker.addOnPositiveButtonClickListener { selection ->
             val date = Date(selection)
             dateHeader.text = getFormattedDate(date)
-            populateTasks(date, dateRecyclerView)
+            observeTasksByDateAndPet(date, petName ?: "")
         }
 
         return rootView
@@ -81,40 +111,39 @@ class PetScheduleFragment : Fragment() {
         return dateFormat.format(date)
     }
 
-    private fun populateTasks(date: Date, recyclerView: RecyclerView) {
-        val queryDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(date)
+    private fun observeTasksByDateAndPet(date: Date, petName: String) {
+        Log.d("PetScheduleFragment", "PetName: $petName")
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val formattedDate = dateFormat.format(date)
+        val startOfDay = "$formattedDate 00:00"
+        val endOfDay = "$formattedDate 23:59"
 
-        getAllTasks(queryDate) { tasks, error ->
-            if (error != null) {
-                Log.e("PetScheduleFragment", "Error fetching tasks: $error")
-                return@getAllTasks
+        snapshotListenerRegistration?.remove()
+
+        snapshotListenerRegistration = scheduleCollection
+            .whereGreaterThanOrEqualTo("date", startOfDay)
+            .whereLessThanOrEqualTo("date", endOfDay)
+            .whereEqualTo("petName", petName) // Filter by pet name
+            .addSnapshotListener { snapshots, error ->
+                if (error != null) {
+                    Log.e("PetScheduleFragment", "Error listening for tasks", error)
+                    return@addSnapshotListener
+                }
+
+                val tasks = snapshots?.documents?.mapNotNull { document ->
+                    document.toObject(Task::class.java)
+                } ?: emptyList()
+
+                adapter.updateTasks(tasks.toMutableList())
+                Log.d("PetScheduleFragment", "Fetched tasks: $tasks")
             }
-            recyclerView.adapter = TaskAdapter(tasks?.toMutableList() ?: mutableListOf()) { task ->
-                val fragment = FormScheduleFragment.newInstance(
-                    isSchedule = true,
-                    title = task.name,
-                    date = task.date,
-                    where = "Unknown",
-                    pet = task.petName,
-                    notes = task.notes,
-                    documentId = task.id
-                )
-                (requireActivity() as FragmentNavigator).navigateToFragment(fragment)
-            }
-        }
     }
 
 
-    private fun getAllTasks(date: String, callback: (List<Task>?, Exception?) -> Unit) {
-        // Implement fetching tasks from the database
-        taskRepositoryAPI.getTasksByDate(date) { tasks, error ->
-            if (error != null) {
-                // Handle error
-                Log.e("CalendarFragment", "Error fetching tasks: $error")
-                return@getTasksByDate
-            }
-            // Handle tasks
-            callback(tasks, null)
-        }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        // Remove the snapshot listener when the fragment view is destroyed
+        snapshotListenerRegistration?.remove()
     }
 }
