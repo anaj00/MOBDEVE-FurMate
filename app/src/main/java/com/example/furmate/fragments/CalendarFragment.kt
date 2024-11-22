@@ -80,6 +80,7 @@ class CalendarFragment : Fragment() {
             }
             dateHeader.text = getFormattedDate(calendar.time)
             val newDate = calendar.time
+            observeTasksByDate(SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(newDate))
         }
 
         return rootView

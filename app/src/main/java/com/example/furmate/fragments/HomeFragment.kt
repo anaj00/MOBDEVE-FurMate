@@ -17,7 +17,9 @@ import com.example.furmate.R
 import com.example.furmate.models.Task
 import com.example.furmate.adapter.TaskAdapter
 import com.example.furmate.utils.MarginItemDecoration
+import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -27,29 +29,43 @@ class HomeFragment : Fragment() {
     private lateinit var todayTasks: ArrayList<Task>
     private lateinit var upcomingTasks: ArrayList<Task>
     private val todayDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+
+    // Firestore Collections
+    private lateinit var scheduleCollection: CollectionReference
+    private lateinit var recordCollection: CollectionReference
+
+    // Snapshot listener registration
+    private var scheduleUpcomingSnapshotListener : ListenerRegistration? = null
+    private var scheduleTodaySnapshotListener : ListenerRegistration? = null
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         val rootView = inflater.inflate(R.layout.screen_home, container, false)
 
+        // Initialize API collection
+        val firestore = FirebaseFirestore.getInstance()
+        scheduleCollection = firestore.collection("Schedule")
+        recordCollection = firestore.collection("Record")
+
         // Set up RecyclerView for "Today" pane
         val todayRecyclerView = rootView.findViewById<RecyclerView>(R.id.today_recycler_view)
-        todayTasks = ArrayList(getSampleTasks())
+        todayTasks = ArrayList()
         todayRecyclerView.layoutManager = LinearLayoutManager(context)
         todayRecyclerView.adapter = TaskAdapter(todayTasks){task -> openTaskDetail(task)}
         todayRecyclerView.addItemDecoration(MarginItemDecoration(16))
 
         // Set up RecyclerView for "Upcoming" pane
         val upcomingRecyclerView = rootView.findViewById<RecyclerView>(R.id.upcoming_recycler_view)
-        upcomingTasks = ArrayList(getSampleTasks())
+        upcomingTasks = ArrayList()
         upcomingRecyclerView.layoutManager = LinearLayoutManager(context)
         upcomingRecyclerView.adapter = TaskAdapter(upcomingTasks){task -> openTaskDetail(task)}
         upcomingRecyclerView.addItemDecoration(MarginItemDecoration(16))
 
         // Fetch tasks from FireStore
-        fetchTodayTasks(todayRecyclerView)
-        fetchUpcomingTasks(upcomingRecyclerView)
+        observeTodayTasks(todayRecyclerView)
+        observeUpcomingTasks(upcomingRecyclerView)
 
         parentFragmentManager.setFragmentResultListener("KEY_NEW_SCHEDULE", this) { requestKey, bundle ->
             for (key in bundle.keySet()) {
@@ -71,47 +87,62 @@ class HomeFragment : Fragment() {
         return rootView
     }
 
-    private fun fetchTodayTasks(todayRecyclerView: RecyclerView) {
-        FirebaseFirestore.getInstance()
-            .collection("Schedule")
-            .whereEqualTo("date", todayDate)
+    private fun observeTodayTasks(todayRecyclerView: RecyclerView) {
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val formattedDate = dateFormat.format(dateFormat.parse(todayDate)!!)
+        val startOfDay = "$formattedDate 00:00"
+        val endOfDay = "$formattedDate 23:59"
+        Log.d("HomeFragment", "Start of day: $startOfDay, End of day: $endOfDay")
+
+        scheduleTodaySnapshotListener?.remove() // Remove previous listener if exists
+
+        scheduleTodaySnapshotListener = scheduleCollection
+            .whereGreaterThanOrEqualTo("date", startOfDay)
+            .whereLessThanOrEqualTo("date", endOfDay)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
-                    Log.w("HomeFragment", "Listen failed.", error)
+                    Log.w("HomeFragment", "Error listening for today tasks.", error)
                     return@addSnapshotListener
                 }
-                if (snapshot != null && !snapshot.isEmpty) { // Ensure snapshot is not empty
+
+                if (snapshot != null && !snapshot.isEmpty) {
                     val tasks = snapshot.documents.mapNotNull { it.toObject(Task::class.java) }
                     todayTasks.clear()
-                    todayTasks.addAll(tasks) // Add all tasks to the list
-                    todayRecyclerView.adapter?.notifyDataSetChanged() // Notify the adapter of data change
+                    todayTasks.addAll(tasks)
+                    todayRecyclerView.adapter?.notifyDataSetChanged()
+                    Log.d("HomeFragment", "Today tasks: $tasks")
                 } else {
-                    Log.d("HomeFragment", "No tasks found in the collection.")
+                    Log.d("HomeFragment", "No tasks found for today.")
                 }
             }
     }
 
-    private fun fetchUpcomingTasks(recyclerView: RecyclerView) {
-        Log.d("Upcoming task", "Fetching upcoming tasks")
-        FirebaseFirestore.getInstance().collection("Schedule")
-            .whereGreaterThan("date", todayDate) // Fetch tasks with dates after today
+    private fun observeUpcomingTasks(upcomingRecyclerView: RecyclerView) {
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val formattedDate = dateFormat.format(dateFormat.parse(todayDate)!!)
+        val startOfDay = "$formattedDate 00:00"
+        val endOfDay = "$formattedDate 23:59"
+        scheduleUpcomingSnapshotListener?.remove() // Remove previous listener if exists
+
+        scheduleUpcomingSnapshotListener = scheduleCollection
+            .whereGreaterThan("date", endOfDay) // Filter tasks after today
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
-                    Log.e("Upcoming task", "Error fetching upcoming tasks", error)
+                    Log.e("HomeFragment", "Error listening for upcoming tasks.", error)
                     return@addSnapshotListener
                 }
+
                 if (snapshot != null && !snapshot.isEmpty) {
                     val tasks = snapshot.documents.mapNotNull { it.toObject(Task::class.java) }
                     upcomingTasks.clear()
                     upcomingTasks.addAll(tasks)
-                    recyclerView.adapter?.notifyDataSetChanged()
-                    Log.d("Upcoming task", "in snapshot != null")
+                    upcomingRecyclerView.adapter?.notifyDataSetChanged()
+                    Log.d("HomeFragment", "Upcoming tasks: $tasks")
                 } else {
-                    Log.d("Upcoming task", "No upcoming tasks found in the collection.")
+                    Log.d("HomeFragment", "No upcoming tasks found.")
                 }
             }
     }
-
     // Function to open a task in detail (or open a form with pre-filled data)
     private fun openTaskDetail(task: Task) {
         // Ensure the parent activity is HomeActivity and hide FABs
@@ -134,81 +165,70 @@ class HomeFragment : Fragment() {
             .commit()
     }
 
-    // Function to get a list of sample tasks
-    private fun getSampleTasks(): List<Task> {
-        return listOf(
-            Task(null, "Walk the Dog", "8:30 AM","boopie"),
-            Task(null, "Feed the Cat", "9:00 AM", "baabaa"),
-            Task(null, "Take a Bath", "10:00 AM", "booboo"),
-            Task(null, "Walk the Dog", "8:30 AM", "boopie"),
-            Task(null, "Feed the Cat", "9:00 AM", "baabaa"),
-            Task(null, "Take a Bath", "10:00 AM", "booboo"),
-            Task(null, "Walk the Dog", "8:30 AM", "boopie"),
-            Task(null, "Feed the Cat", "9:00 AM", "baabaa"),
-            Task(null, "Take a Bath", "10:00 AM", "booboo"),
-            Task(null, "Walk the Dog", "8:30 AM", "boopie"),
-            Task(null, "Feed the Cat", "9:00 AM", "baabaa"),
-            Task(null, "Take a Bath", "10:00 AM", "booboo"),
-        )
-    }
 
-    // Function to add a task view to the layout
-    private fun addTasksToLayout(parentLayout: ConstraintLayout, tasks: List<Task>, inflater: LayoutInflater) {
-        var previousViewId: Int? = null // Initialize the ID of the previous view to null
+//    // Function to add a task view to the layout
+//    private fun addTasksToLayout(parentLayout: ConstraintLayout, tasks: List<Task>, inflater: LayoutInflater) {
+//        var previousViewId: Int? = null // Initialize the ID of the previous view to null
+//
+//        for (task in tasks) {
+//            val taskView = inflateTaskView(inflater, parentLayout) // Inflate the task view
+//            setTaskViewContent(taskView, task) // Set the content of the task view
+//            addTaskViewToLayout(parentLayout, taskView, previousViewId) // Add the task view to the layout
+//            previousViewId = taskView.id // Update the ID of the previous view
+//        }
+//    }
+//
+//    // Function to inflate the reusable task view
+//    private fun inflateTaskView(inflater: LayoutInflater, parent: ViewGroup): View {
+//        return inflater.inflate(R.layout.composable_schedule_card, parent, false).apply {
+//            id = View.generateViewId() // Generate a unique ID for each inflated view
+//        }
+//    }
+//
+//    // Function to set the content of the task view
+//    private fun setTaskViewContent(view: View, task: Task) {
+//        val taskTitleView = view.findViewById<TextView>(R.id.task_title)
+//        val taskTimeView = view.findViewById<TextView>(R.id.task_time)
+//        taskTitleView.text = task.name
+//        taskTimeView.text = task.date
+//    }
+//
+//    // Function to add the task view to the parent layout with appropriate constraints
+//    private fun addTaskViewToLayout(parentLayout: ConstraintLayout, taskView: View, previousViewId: Int?) {
+//        // Add the view to the parent ConstraintLayout
+//        parentLayout.addView(taskView)
+//
+//        // Apply constraints to position the view within the ConstraintLayout
+//        val constraintSet = ConstraintSet()
+//        constraintSet.clone(parentLayout)  // Clone the existing constraints
+//
+//        if (previousViewId == null) {
+//            // If this is the first view, connect it to the parent top
+//            constraintSet.connect(
+//                taskView.id, ConstraintSet.TOP,
+//                ConstraintSet.PARENT_ID, ConstraintSet.TOP, 16
+//            )
+//        } else {
+//            // If this is not the first view, connect it below the previous view
+//            constraintSet.connect(
+//                taskView.id, ConstraintSet.TOP,
+//                previousViewId, ConstraintSet.BOTTOM, 16
+//            )
+//        }
+//
+//        // Connect the start of the view to the start of the parent layout
+//        constraintSet.connect(
+//            taskView.id, ConstraintSet.START,
+//            ConstraintSet.PARENT_ID, ConstraintSet.START, 0
+//        )
+//
+//        // Apply the new constraints to the ConstraintLayout
+//        constraintSet.applyTo(parentLayout)
+//    }
 
-        for (task in tasks) {
-            val taskView = inflateTaskView(inflater, parentLayout) // Inflate the task view
-            setTaskViewContent(taskView, task) // Set the content of the task view
-            addTaskViewToLayout(parentLayout, taskView, previousViewId) // Add the task view to the layout
-            previousViewId = taskView.id // Update the ID of the previous view
-        }
-    }
-
-    // Function to inflate the reusable task view
-    private fun inflateTaskView(inflater: LayoutInflater, parent: ViewGroup): View {
-        return inflater.inflate(R.layout.composable_schedule_card, parent, false).apply {
-            id = View.generateViewId() // Generate a unique ID for each inflated view
-        }
-    }
-
-    // Function to set the content of the task view
-    private fun setTaskViewContent(view: View, task: Task) {
-        val taskTitleView = view.findViewById<TextView>(R.id.task_title)
-        val taskTimeView = view.findViewById<TextView>(R.id.task_time)
-        taskTitleView.text = task.name
-        taskTimeView.text = task.date
-    }
-
-    // Function to add the task view to the parent layout with appropriate constraints
-    private fun addTaskViewToLayout(parentLayout: ConstraintLayout, taskView: View, previousViewId: Int?) {
-        // Add the view to the parent ConstraintLayout
-        parentLayout.addView(taskView)
-
-        // Apply constraints to position the view within the ConstraintLayout
-        val constraintSet = ConstraintSet()
-        constraintSet.clone(parentLayout)  // Clone the existing constraints
-
-        if (previousViewId == null) {
-            // If this is the first view, connect it to the parent top
-            constraintSet.connect(
-                taskView.id, ConstraintSet.TOP,
-                ConstraintSet.PARENT_ID, ConstraintSet.TOP, 16
-            )
-        } else {
-            // If this is not the first view, connect it below the previous view
-            constraintSet.connect(
-                taskView.id, ConstraintSet.TOP,
-                previousViewId, ConstraintSet.BOTTOM, 16
-            )
-        }
-
-        // Connect the start of the view to the start of the parent layout
-        constraintSet.connect(
-            taskView.id, ConstraintSet.START,
-            ConstraintSet.PARENT_ID, ConstraintSet.START, 0
-        )
-
-        // Apply the new constraints to the ConstraintLayout
-        constraintSet.applyTo(parentLayout)
+    override fun onDestroyView() {
+        super.onDestroyView()
+        scheduleTodaySnapshotListener?.remove()
+        scheduleUpcomingSnapshotListener?.remove()
     }
 }
