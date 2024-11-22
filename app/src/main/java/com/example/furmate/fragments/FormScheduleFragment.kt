@@ -19,6 +19,9 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
+import java.text.SimpleDateFormat
+import java.util.Locale
+import kotlin.math.log
 
 
 class FormScheduleFragment() : Fragment() {
@@ -28,6 +31,8 @@ class FormScheduleFragment() : Fragment() {
     private var taskWhere: String? = null
     private var taskPet: String? = null
     private var taskNotes: String? = null
+    private var isEditMode: Boolean = false
+    private var documentId: String? = null
 
     private lateinit var submitButton: Button
 
@@ -40,7 +45,12 @@ class FormScheduleFragment() : Fragment() {
     // APIs
     private lateinit var taskRepositoryAPI: TaskRepositoryAPI
 
-
+    private val hintToFieldMap = mapOf(
+        "Title" to "name",
+        "Date" to "date",
+        "Pet" to "petName",
+        "Notes" to "notes"
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,6 +62,7 @@ class FormScheduleFragment() : Fragment() {
             taskWhere = it.getString("task_where")
             taskPet = it.getString("task_pet")
             taskNotes = it.getString("task_notes")
+            documentId = it.getString("document_id")
         }
 
         // restore data from when screen was unloaded
@@ -61,7 +72,10 @@ class FormScheduleFragment() : Fragment() {
             taskWhere = savedInstanceState.getString("Where")
             taskPet = savedInstanceState.getString("Pet")
             taskNotes = savedInstanceState.getString("Notes")
+            documentId = savedInstanceState.getString("document_id")
         }
+
+        isEditMode = documentId != null
     }
 
     override fun onCreateView(
@@ -125,35 +139,63 @@ class FormScheduleFragment() : Fragment() {
 
             for (child in recyclerView.children) {
                 val holder = recyclerView.getChildViewHolder(child)
-                val key = holder.itemView.findViewById<TextInputLayout>(R.id.enter_hint_div).hint.toString()
+                val hint = holder.itemView.findViewById<TextInputLayout>(R.id.enter_hint_div).hint.toString()
+                val key = hintToFieldMap[hint] ?: hint.lowercase(Locale.getDefault())
                 val value = holder.itemView.findViewById<TextInputEditText>(R.id.input_field).text.toString()
 
-                taskData[key] = value
+                Log.d("FormScheduleFragment", "Hint: $hint, FieldName: $key, Value: $value")
+
+                if (key.isNotEmpty() && value.isNotEmpty()) {
+                    taskData[key] = if (key == "date") {
+                        // Ensure the date is always in a consistent format
+                        val inputFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+                        val parsedDate = inputFormat.parse(value)
+                        val outputFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+                        parsedDate?.let { outputFormat.format(it) } ?: value
+                    } else {
+                        value
+                    }
+                }
             }
 
+            Log.d("FormScheduleFragment", "is editmode Value: $isEditMode")
+            if (isEditMode) {
+                // Update existing document
+                Log.d("FormScheduleFragment", "before api call")
+                val updatedTask = taskData.mapValues { it.value as Any }
+                documentId?.let { id ->
+                    taskRepositoryAPI.updateTask(id, updatedTask) { success, exception ->
+                        if (success) {
+                            Log.d("FormScheduleFragment", "Task successfully updated")
+                        } else {
+                            Log.e("FormScheduleFragment", "Error updating task", exception)
+                        }
+                    }
+                }
+            } else {
+                Log.d("FormScheduleFragment","isSchedule: $isSchedule")
+                if (isSchedule!!) {
+                    // Add the task to the Firestore database
+                    val task = Task(
+                        name = taskData["name"] ?: "",
+                        date = taskData["date"] ?: "1970-01-01 00:00", // Default date value
+                        petName = taskData["petName"] ?: "",
+                        notes = taskData["notes"]
+                    )
+                    taskRepositoryAPI.addTask(task)
+                } else {
+                    // Add the record to the Firestore database
+                    val record = Task(
+                        name = taskData["Title"]!!,
+                        petName = taskData["Pet"]!!,
+                        notes = taskData["Notes"]
+                    )
+                    taskRepositoryAPI.addTask(record)
+                    Log.d("FormScheduleFragment", "Record submitted")
+                }
+            }
             // Test for differentiating the return value
             Log.d("FormScheduleFragment", "onCreateView: $taskData")
-
-            if (isSchedule!!) {
-                // Add the task to the Firestore database
-                 val task = Task(
-                     name = taskData["Title"]!!,
-                     date = taskData["Date"]!!,
-                     petName = taskData["Pet"]!!,
-                     notes = taskData["Notes"]
-                 )
-                taskRepositoryAPI.addTask(task)
-            } else {
-                // Add the record to the Firestore database
-                val record = Task(
-                    name = taskData["Title"]!!,
-                    petName = taskData["Pet"]!!,
-                    notes = taskData["Notes"]
-                )
-                taskRepositoryAPI.addTask(record)
-                Log.d("FormScheduleFragment", "Record submitted")
-            }
-
             requireActivity().onBackPressedDispatcher.onBackPressed()
         }
 
@@ -176,7 +218,7 @@ class FormScheduleFragment() : Fragment() {
         // Function to create a new instance with pre-filled data
         fun newInstance(
             isSchedule: Boolean, title: String?, date: String?, where: String?,
-            pet: String?, notes: String?
+            pet: String?, notes: String?, documentId: String? = null
         ): FormScheduleFragment {
             val fragment = FormScheduleFragment()
             val args = Bundle()
@@ -186,6 +228,7 @@ class FormScheduleFragment() : Fragment() {
             args.putString("task_where", where)
             args.putString("task_pet", pet)
             args.putString("task_notes", notes)
+            args.putString("document_id", documentId)
             fragment.arguments = args
             return fragment
         }

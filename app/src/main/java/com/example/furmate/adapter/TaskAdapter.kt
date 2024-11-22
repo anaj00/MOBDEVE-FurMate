@@ -10,7 +10,7 @@ import com.example.furmate.models.Task
 import com.google.android.material.card.MaterialCardView
 
 class TaskAdapter(
-    private val tasks: List<Task>,
+    private val tasks: MutableList<Task>,
     private val onItemClick: (Task) -> Unit  // Lambda function to handle clicks
 ) : RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
 
@@ -38,4 +38,11 @@ class TaskAdapter(
     }
 
     override fun getItemCount(): Int = tasks.size
+
+    // Function to update the list of tasks
+    fun updateTasks(newTasks: List<Task>) {
+        tasks.clear()
+        tasks.addAll(newTasks)
+        notifyDataSetChanged()
+    }
 }

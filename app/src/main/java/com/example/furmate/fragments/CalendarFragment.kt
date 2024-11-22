@@ -15,7 +15,9 @@ import com.example.furmate.adapter.TaskAdapter
 import com.example.furmate.db.TaskRepositoryAPI
 import com.example.furmate.models.Task
 import com.example.furmate.utils.MarginItemDecoration
+import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import okhttp3.internal.http2.Header
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -23,7 +25,11 @@ import java.util.Date
 import java.util.Locale
 
 class CalendarFragment : Fragment() {
+    private lateinit var adapter: TaskAdapter
+    private lateinit var scheduleCollection: CollectionReference
     private lateinit var taskRepositoryAPI: TaskRepositoryAPI
+    private var snapshotListenerRegistration: ListenerRegistration? = null
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -36,19 +42,35 @@ class CalendarFragment : Fragment() {
 
         // Initialize API collection
         val firestore = FirebaseFirestore.getInstance()
-        val scheduleCollection = firestore.collection("Schedule")
+        scheduleCollection = firestore.collection("Schedule")
         taskRepositoryAPI = TaskRepositoryAPI(scheduleCollection)
 
-        // Set the initial date in the header
-        dateHeader.text = getFormattedDate(Calendar.getInstance().time)
+        adapter = TaskAdapter(mutableListOf()) { task ->
+            val fragment = FormScheduleFragment.newInstance(
+                isSchedule = true,
+                title = task.name,
+                date = task.date,
+                where = "Unknown",
+                pet = task.petName,
+                notes = task.notes,
+                documentId = task.id
+            )
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, fragment)
+                .addToBackStack(null)
+                .commit()
+        }
 
         dateRecyclerView.apply {
             layoutManager = LinearLayoutManager(context)
             addItemDecoration(MarginItemDecoration(16))
+            adapter = this@CalendarFragment.adapter
         }
 
+        // Set the initial date in the header
         val selectedDate = Calendar.getInstance().time
-        populateTasks(selectedDate, dateRecyclerView)
+        dateHeader.text = getFormattedDate(selectedDate)
+        observeTasksByDate(SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(selectedDate))
 
 
         // Set up date picker
@@ -58,7 +80,6 @@ class CalendarFragment : Fragment() {
             }
             dateHeader.text = getFormattedDate(calendar.time)
             val newDate = calendar.time
-            populateTasks(newDate, dateRecyclerView)
         }
 
         return rootView
@@ -71,42 +92,48 @@ class CalendarFragment : Fragment() {
     }
 
     // Populate the RecyclerView with tasks for the selected date
-    // TODO: when clicking on the task, the form should open with the task details and should update the task values in DB
-    private fun populateTasks(date: Date, recyclerView: RecyclerView) {
-        val queryDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(date)
+    private fun observeTasksByDate(date: String) {
+        val startOfDay = "$date 00:00"
+        val endOfDay = "$date 23:59"
 
-        getAllTasks(queryDate) { tasks, error ->
-            if (error != null) {
-                Log.e("CalendarFragment", "Error fetching tasks: $error")
-                return@getAllTasks
-            }
-            recyclerView.adapter = TaskAdapter(tasks ?: emptyList()) { task ->
-                val fragment = FormScheduleFragment.newInstance(
-                    isSchedule = true,
-                    title = task.name,
-                    date = task.date,
-                    where = "Unkown",
-                    pet = task.petName,
-                    notes = task.notes
-                )
+        // Remove previous listener if it exists
+        snapshotListenerRegistration?.remove()
 
-                parentFragmentManager.beginTransaction()
-                    .replace(R.id.fragment_container, fragment)
-                    .addToBackStack(null)
-                    .commit()
+        snapshotListenerRegistration = scheduleCollection
+            .whereGreaterThanOrEqualTo("date", startOfDay)
+            .whereLessThanOrEqualTo("date", endOfDay)
+            .addSnapshotListener { snapshots, error ->
+                if (error != null) {
+                    Log.e("CalendarFragment", "Error listening for tasks", error)
+                    return@addSnapshotListener
+                }
+
+                // Map Firestore documents to Task objects
+                val tasks = snapshots?.documents?.mapNotNull { document ->
+                    try {
+                        Task(
+                            id = document.getString("id") ?: "",
+                            name = document.getString("name") ?: "",
+                            date = document.getString("date"), // Convert to Timestamp or String based on your data
+                            petName = document.getString("petName") ?: "",
+                            notes = document.getString("notes")
+                        )
+                    } catch (e: Exception) {
+                        Log.e("CalendarFragment", "Error mapping document to Task", e)
+                        null
+                    }
+                } ?: emptyList()
+
+                Log.d("CalendarFragment", "Fetched tasks: $tasks")
+
+                // Update the adapter's dataset
+                adapter.updateTasks(tasks)
             }
-        }
     }
 
-    private fun getAllTasks(date: String, callback: (List<Task>?, Exception?) -> Unit) {
-        taskRepositoryAPI.getTasksByDate(date) { tasks, error ->
-            if (error != null) {
-                Log.e("CalendarFragment", "Error fetching tasks: $error")
-                return@getTasksByDate
-            }
-            Log.d("CalendarFragment", "date value = $date")
-            Log.d("CalendarFragment", "Fetched tasks: $tasks")
-            callback(tasks, null)
-        }
+    override fun onDestroyView() {
+        super.onDestroyView()
+        // Remove the snapshot listener when the fragment view is destroyed
+        snapshotListenerRegistration?.remove()
     }
 }

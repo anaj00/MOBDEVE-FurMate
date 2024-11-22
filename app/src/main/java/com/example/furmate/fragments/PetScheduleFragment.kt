@@ -89,14 +89,15 @@ class PetScheduleFragment : Fragment() {
                 Log.e("PetScheduleFragment", "Error fetching tasks: $error")
                 return@getAllTasks
             }
-            recyclerView.adapter = TaskAdapter(tasks ?: emptyList()) { task ->
+            recyclerView.adapter = TaskAdapter(tasks?.toMutableList() ?: mutableListOf()) { task ->
                 val fragment = FormScheduleFragment.newInstance(
                     isSchedule = true,
                     title = task.name,
                     date = task.date,
                     where = "Unknown",
                     pet = task.petName,
-                    notes = task.notes
+                    notes = task.notes,
+                    documentId = task.id
                 )
                 (requireActivity() as FragmentNavigator).navigateToFragment(fragment)
             }
