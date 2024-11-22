@@ -36,7 +36,7 @@ class CalendarFragment : Fragment() {
 
         // Initialize API collection
         val firestore = FirebaseFirestore.getInstance()
-        val scheduleCollection = FirebaseFirestore.getInstance().collection("Schedule")
+        val scheduleCollection = firestore.collection("Schedule")
         taskRepositoryAPI = TaskRepositoryAPI(scheduleCollection)
 
         // Set the initial date in the header
