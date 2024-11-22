@@ -70,4 +70,8 @@ dependencies {
 
     // Google identity library
     implementation("com.google.android.gms:play-services-auth:21.2.0")
+
+    // Facebook SDK
+    implementation(libs.facebook.android.sdk)
+
 }

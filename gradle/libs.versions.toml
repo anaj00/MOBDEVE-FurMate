@@ -1,6 +1,7 @@
 [versions]
 agp = "8.7.1"
 credentials = "1.5.0-beta01"
+facebookAndroidSdk = "latest.release"
 firebaseBom = "33.5.1"
 firebaseFirestore = "24.9.1"
 firebaseStorage = "21.0.1"
@@ -26,6 +27,7 @@ picasso = "2.8"
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-credentials = { module = "androidx.credentials:credentials", version.ref = "credentials" }
 androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragmentKtx" }
+facebook-android-sdk = { module = "com.facebook.android:facebook-android-sdk", version.ref = "facebookAndroidSdk" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-firestore = { module = "com.google.firebase:firebase-firestore", version.ref = "firebaseFirestore" }

@@ -24,6 +24,8 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
+import com.facebook.FacebookSdk;
+import com.facebook.appevents.AppEventsLogger;
 
 class LoginActivity : AppCompatActivity() {
     private val GOOGLE_ANDROID_CLIENT_ID = "5695861005-kihkqrp31tltjh6pkkdrc2sfas3g74nc.apps.googleusercontent.com"
