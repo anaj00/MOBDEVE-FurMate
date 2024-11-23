@@ -1,19 +1,16 @@
 package com.example.furmate
 
-
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
+import android.widget.ImageButton
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.furmate.adapter.ComposableInputAdapter
-import com.example.furmate.db.PetRepositoryAPI
 import com.example.furmate.utils.MarginItemDecoration
-import com.google.firebase.firestore.CollectionReference
-import com.google.firebase.firestore.FirebaseFirestore
 
 class PetProfileHomeFragment : Fragment() {
     private var petName: String? = null
@@ -24,11 +21,8 @@ class PetProfileHomeFragment : Fragment() {
     private var petNotes: String? = null
 
     private lateinit var recyclerView: RecyclerView
-
-    // Firestore Collections
-    private lateinit var petCollection: CollectionReference
-    // APIs
-    private lateinit var petRepositoryAPI: PetRepositoryAPI
+    private lateinit var editButton: ImageButton
+    private lateinit var adapter: ComposableInputAdapter // Adapter instance for toggling inputs
 
     companion object {
         fun newInstance(): PetProfileHomeFragment {
@@ -36,40 +30,40 @@ class PetProfileHomeFragment : Fragment() {
         }
     }
 
+    private var areInputsEnabled = false
+
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val rootView =  inflater.inflate(R.layout.screen_pet_profile_main, container, false)
+        val rootView = inflater.inflate(R.layout.screen_pet_profile_main, container, false)
 
-        recyclerView = rootView.findViewById<RecyclerView>(R.id.pet_edit_form_wrapper)
+        recyclerView = rootView.findViewById(R.id.pet_edit_form_wrapper)
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.addItemDecoration(MarginItemDecoration(16))
 
-        // Initialize the Firestore instance
-        val firestore = FirebaseFirestore.getInstance()
+        editButton = rootView.findViewById(R.id.edit_btn)
 
-        // Initilize the Firestore collection
-        petCollection = firestore.collection("Pet")
-        petRepositoryAPI = PetRepositoryAPI(petCollection)
+        val composableInputs = listOf("Name", "Breed", "Sex", "Birthday", "Weight", "Notes")
+        val inputValues = listOf(
+            petName ?: "",
+            petBreed ?: "",
+            petSex ?: "",
+            petBirthday ?: "",
+            petWeight ?: "",
+            petNotes ?: ""
+        )
 
-        val composableInputs = {
-            listOf("Name", "Breed", "Sex", "Birthday", "Weight", "Notes")
-        }
-
-        val inputValues = {
-            listOf(
-                petName ?: "",
-                petBreed ?: "",
-                petSex ?: "",
-                petBirthday ?: "",
-                petWeight ?: "",
-                petNotes ?: ""
-            )
-        }
-
-        val adapter = ComposableInputAdapter(composableInputs(), inputValues(), requireContext())
+        adapter = ComposableInputAdapter(composableInputs, inputValues, requireContext())
         recyclerView.adapter = adapter
+        adapter.setInputEnabled(areInputsEnabled) // Set initial state
+
+        // Toggle all inputs when the edit button is clicked
+        editButton.setOnClickListener {
+            areInputsEnabled = !areInputsEnabled // Toggle state
+            adapter.setInputEnabled(areInputsEnabled) // Apply the new state to all inputs
+        }
 
         return rootView
     }
