@@ -6,18 +6,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.commit
 import androidx.gridlayout.widget.GridLayout
-import com.example.furmate.fragments.FormAddPetFragment
-import com.example.furmate.fragments.PetProfileFragment
+import com.example.furmate.fragments.FormAddBookFragment
 import com.example.furmate.models.Book
-import com.example.furmate.models.Pet
 
-class PetRecordsFragment : Fragment() {
+class PetBookFragment : Fragment() {
 
     companion object {
-        fun newInstance(): PetRecordsFragment {
-            return PetRecordsFragment()
+        fun newInstance(): PetBookFragment {
+            return PetBookFragment()
         }
     }
 
@@ -44,7 +41,7 @@ class PetRecordsFragment : Fragment() {
         bookAddTitle.text = "Add Book"
 
         bookAdd.setOnClickListener {
-//            openAddBookForm()
+            openAddBookForm()
         }
         gridLayout.addView(bookAdd)
 
@@ -66,7 +63,7 @@ class PetRecordsFragment : Fragment() {
             }
 
             bookItemView.setOnClickListener {
-//                openBookProfile(book)
+                openBookProfile()
             }
 
             // Add the book item to the GridLayout
@@ -76,23 +73,15 @@ class PetRecordsFragment : Fragment() {
         return rootView
     }
 
-//    private fun openBookProfile(book: Book) {
-//        val fragment = PetProfileFragment.newInstance(book.id ?: "null")
-//        parentFragmentManager.commit {
-//            setReorderingAllowed(true)
-//            replace(R.id.fragment_container, fragment)
-//            addToBackStack(null)
-//        }
-//    }
+    private fun openBookProfile() {
+        val fragment = PetBookRecordFragment.newInstance()
+        (requireActivity() as FragmentNavigator).navigateToFragment(fragment)
+    }
 
-//    private fun openAddBookForm() {
-//        val fragment = FormAddBookFragment()
-//        parentFragmentManager.commit {
-//            setReorderingAllowed(true)
-//            replace(R.id.fragment_container, fragment)
-//            addToBackStack(null)
-//        }
-//    }
+    private fun openAddBookForm() {
+        val fragment = FormAddBookFragment.newInstance()
+        (requireActivity() as FragmentNavigator).navigateToFragment(fragment)
+    }
 
     private fun generateDummyBooks(): List<Book> {
         // Generate a list of dummy books
