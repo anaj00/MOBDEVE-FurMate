@@ -2,6 +2,7 @@ package com.example.furmate
 
 import CalendarFragment
 import PetsFragment
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Rect
 import android.os.Bundle
@@ -114,7 +115,7 @@ class HomeActivity : AppCompatActivity(), FragmentNavigator {
             popupMenu.setOnMenuItemClickListener { item ->
                 when (item.itemId) {
                     R.id.logout -> {
-                        // Handle logout
+                        logOut()
                         true
                     }
                     else -> false
@@ -122,9 +123,36 @@ class HomeActivity : AppCompatActivity(), FragmentNavigator {
             }
             popupMenu.show()
         }
+    }
 
+    fun logOut() {
+        val auth = Firebase.auth
+        val currentUser = auth.currentUser
 
+        var googleLogout = false
+        var facebookLogout = false
 
+        currentUser?.let {
+            for (profile in it.providerData) {
+                val providerId = profile.providerId
+
+                if (providerId == "google.com") {
+                    googleLogout = true
+                }
+
+                // TODO: Implement Facebook Logout check
+
+                Log.d("UserProvider", providerId)
+            }
+        }
+
+        auth.signOut()
+
+        val intent = Intent(this, LoginActivity::class.java)
+        intent.putExtra("KEY_GOOGLE_LOGOUT", googleLogout)
+        intent.putExtra("KEY_FACEBOOK_LOGOUT", facebookLogout)
+        startActivity(intent)
+        finish() // Finish this activity so it cannot be accessed via back button
     }
 
     override fun navigateToFragment(fragment: Fragment) {

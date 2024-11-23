@@ -62,6 +62,21 @@ class LoginActivity : AppCompatActivity() {
         handleCreateAccount()
         handleLogin()
         handleGoogleLogin()
+
+        // If the user logged out from HomeActivity, logout additional sign-in providers
+        val googleLogout = intent.getBooleanExtra("KEY_GOOGLE_LOGOUT", false)
+        val facebookLogout = intent.getBooleanExtra("KEY_FACEBOOK_LOGOUT", false)
+
+        if (googleLogout) {
+            googleSignInClient.signOut()
+        }
+
+        // TODO: Implement Facebook logout
+
+        // If there is already a logged-in user, go directly to homeactivity
+        if (auth.currentUser != null) {
+            goToHomeScreen()
+        }
     }
 
     private fun handleLogin() {
@@ -131,9 +146,6 @@ class LoginActivity : AppCompatActivity() {
                     .addOnFailureListener {e ->
                         Log.d("Google Login Error", e.toString())
                     }
-
-                // TEMP
-                googleSignInClient.signOut()
             } catch (e: ApiException) {
                 // The ApiException status code indicates the detailed failure reason.
                 // Please refer to the GoogleSignInStatusCodes class reference for more information.
