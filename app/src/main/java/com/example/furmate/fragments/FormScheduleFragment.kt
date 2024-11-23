@@ -107,7 +107,7 @@ class FormScheduleFragment() : Fragment() {
         val composableInputs = if (isSchedule!!) {
             listOf("Title", "Date", "Pet", "Notes")
         } else {
-            listOf("Title", "Pet", "Notes")
+            listOf("Title", "Pet", "Notes", "Image")
         }
 
         // Pre-fill the fields if task data exists
