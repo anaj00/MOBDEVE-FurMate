@@ -28,6 +28,7 @@ class PetProfileFragment : Fragment() {
             val args = Bundle()
             args.putString(ARG_PET_ID, petId)
             fragment.arguments = args
+            Log.d("FormAddBookFragment", "Pet ID: $ARG_PET_ID in pet profile fragment")
             return fragment
         }
     }
@@ -81,7 +82,7 @@ class PetProfileFragment : Fragment() {
             override fun createFragment(position: Int): Fragment {
                 return when (position) {
                     0 -> PetProfileHomeFragment.newInstance()
-                    1 -> PetBookFragment.newInstance()
+                    1 -> PetBookFragment.newInstance(petID = petId ?: "")
                     2 -> PetScheduleFragment.newInstance(petName = petNameTextView.text.toString())
                     else -> throw IllegalArgumentException("Invalid position")
                 }

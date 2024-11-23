@@ -1,17 +1,21 @@
 package com.example.furmate
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.gridlayout.widget.GridLayout
+import com.example.furmate.db.BookRepositoryAPI
 import com.example.furmate.fragments.FormAddBookFragment
 import com.example.furmate.models.Book
 import com.example.furmate.models.Task
+import com.google.firebase.firestore.FirebaseFirestore
 
 class PetBookRecordFragment : Fragment() {
+    private lateinit var bookRepositoryAPI: BookRepositoryAPI
 
     companion object {
         fun newInstance(): PetBookRecordFragment {
@@ -30,21 +34,38 @@ class PetBookRecordFragment : Fragment() {
         // Replace backend call with dummy data
         val records = generateDummyRecords()
 
-        // Add a button to add a new record
-        val recordAdd = inflater.inflate(R.layout.button_addpet, gridLayout, false)
-        recordAdd.post {
-            val width = recordAdd.width
-            val layoutParams = recordAdd.layoutParams
-            layoutParams.height = width
-            recordAdd.layoutParams = layoutParams
-        }
-        val recordAddTitle = recordAdd.findViewById<TextView>(R.id.pet_name1)
-        recordAddTitle.text = "Add Record"
 
-        recordAdd.setOnClickListener {
-            openAddRecordForm()
+        // Initialize firestore
+        val firestore = FirebaseFirestore.getInstance()
+        val bookCollection = firestore.collection("Books")
+        bookRepositoryAPI = BookRepositoryAPI(bookCollection)
+
+
+        getAllBooks { books, error ->
+            if (error != null) {
+                // Handle error
+                Log.e("PetBookRecordFragment", "Error fetching books: $error")
+                return@getAllBooks
+            }
+
+            // Add a button to add a new record
+            val recordAdd = inflater.inflate(R.layout.button_addpet, gridLayout, false)
+            recordAdd.post {
+                val width = recordAdd.width
+                val layoutParams = recordAdd.layoutParams
+                layoutParams.height = width
+                recordAdd.layoutParams = layoutParams
+            }
+
         }
-        gridLayout.addView(recordAdd)
+
+
+
+
+
+
+
+
 
         // Dynamically add record items to GridLayout
         for (record in records) {
@@ -109,5 +130,15 @@ class PetBookRecordFragment : Fragment() {
             Task("Record 4"),
             Task("Record 5")
         )
+    }
+
+    private fun getAllBooks (callback: (List<Book>?, Exception?) -> Unit) {
+        bookRepositoryAPI.getAllBooks { books, error ->
+            if (error != null) {
+                callback(null, error) // Pass the error to the callback
+            } else {
+                callback(books, null) // Pass the fetched
+            }
+        }
     }
 }

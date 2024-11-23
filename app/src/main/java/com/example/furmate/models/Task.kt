@@ -6,5 +6,7 @@ data class Task(
     var name: String = "",
     var date: String ?= null,
     var petName: String = "",
-    var notes: String?= null
+    var notes: String?= null,
+    var userID: String?= null,
+    var bookID: String?= null
 )

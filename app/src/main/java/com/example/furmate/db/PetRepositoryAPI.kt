@@ -2,6 +2,8 @@ package com.example.furmate.db
 
 import android.util.Log
 import com.example.furmate.models.Pet
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import com.google.firebase.firestore.CollectionReference
 
 class PetRepositoryAPI (private val collection: CollectionReference) {
@@ -22,6 +24,7 @@ class PetRepositoryAPI (private val collection: CollectionReference) {
 
 
     fun getAllPets(callback: (List<Pet>?, Exception?) -> Unit) {
+        val uid = Firebase.auth.currentUser?.uid
         collection
             .get()
             .addOnSuccessListener { result ->
