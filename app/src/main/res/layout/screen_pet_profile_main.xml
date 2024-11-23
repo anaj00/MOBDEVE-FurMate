@@ -28,7 +28,7 @@
             android:tint="@color/white"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/edit" />
+            app:srcCompat="@android:drawable/ic_menu_gallery" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"

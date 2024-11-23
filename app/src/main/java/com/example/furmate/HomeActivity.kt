@@ -11,12 +11,15 @@ import android.view.MotionEvent
 import android.view.View
 import android.widget.ImageButton
 import android.widget.PopupMenu
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.transition.TransitionManager
 import com.example.furmate.fragments.HomeFragment
 import com.example.furmate.FragmentNavigator
+import com.example.furmate.adapter.ComposableInputAdapter
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -52,6 +55,22 @@ class HomeActivity : AppCompatActivity(), FragmentNavigator {
     private lateinit var recordFAB: ExtendedFloatingActionButton
 
     private lateinit var profileButton: ImageButton
+
+    val getFile = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result: ActivityResult ->
+        if (result.resultCode == RESULT_OK) {
+            val selectedImageURI = result.data?.data
+            if (selectedImageURI != null) {
+                val image = selectedImageURI.toString()
+
+                val currentFragment = fragments[this.currentFragmentName]
+                if (currentFragment is PetsFragment) {
+                    currentFragment.sendImageURIToAddPetFragment(image)
+                }
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         /*
@@ -280,6 +299,12 @@ class HomeActivity : AppCompatActivity(), FragmentNavigator {
         mainFAB.visibility = View.VISIBLE
         scheduleFAB.visibility = View.GONE // Keep these hidden until the main FAB is clicked again
         recordFAB.visibility = View.GONE
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        Log.d("HomeActivity", "onactivityresult called with $requestCode $resultCode $data")
     }
 
     // TEMP: CODE SNIPPETS FOR TESTING

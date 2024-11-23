@@ -16,6 +16,7 @@ import com.example.furmate.models.Pet
 
 class PetsFragment : Fragment() {
     private lateinit var petRepositoryAPI: PetRepositoryAPI
+    private lateinit var addPetFragment: FormAddPetFragment
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -29,6 +30,8 @@ class PetsFragment : Fragment() {
 
         // Set the column count for a two-column layout
         gridLayout.columnCount = 2
+
+        addPetFragment = FormAddPetFragment()
 
         val firestore = FirebaseFirestore.getInstance()
         val petCollection = firestore.collection("Pet") // Adjust collection name as needed
@@ -96,10 +99,10 @@ class PetsFragment : Fragment() {
 
     private fun openAddPetForm() {
         Log.d("PetListFragment", "Navigating to FormAddPetFragment")
-        val fragment = FormAddPetFragment()
+
         parentFragmentManager.commit {
             setReorderingAllowed(true)
-            replace(R.id.fragment_container, fragment)
+            replace(R.id.fragment_container, addPetFragment)
             addToBackStack(null)
         }
     }
@@ -113,6 +116,10 @@ class PetsFragment : Fragment() {
                 callback(pets, null) // Pass the fetched pets to the callback
             }
         }
+    }
+
+    public fun sendImageURIToAddPetFragment(uri: String) {
+        addPetFragment.setPetImageURI(uri)
     }
 
 }

@@ -56,6 +56,8 @@ class FormAddPetFragment : Fragment() {
 
     private lateinit var filePickerLauncher: ActivityResultLauncher<Intent>
 
+    private lateinit var formEntries: ArrayList<String>
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -73,6 +75,8 @@ class FormAddPetFragment : Fragment() {
         petCollection = firestore.collection("Pet")
         petRepositoryAPI = PetRepositoryAPI(petCollection)
 
+        formEntries = ArrayList()
+
         val composableInputs = {
             listOf("Name", "Profile Picture", "Breed", "Sex", "Birthday", "Weight", "Notes")
         }
@@ -89,23 +93,27 @@ class FormAddPetFragment : Fragment() {
             )
         }
 
+        for (value in inputValues()) {
+            formEntries.add(value)
+        }
+
         // Log the data being passed to the adapter
         Log.d("FormAddPetFragment", "Composable Inputs: ${composableInputs()}")
-        Log.d("FormAddPetFragment", "Input Values: ${inputValues()}")
+        Log.d("FormAddPetFragment", "Input Values: $formEntries")
 
-        val adapter = ComposableInputAdapter(composableInputs(), inputValues(), requireContext())
+        val adapter = ComposableInputAdapter(composableInputs(), formEntries, requireContext())
         recyclerView.adapter = adapter
 
-        filePickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == AppCompatActivity.RESULT_OK) {
-                val selectedImageUri = result.data?.data
-                if (selectedImageUri != null) {
-                    Log.d("FormAddPetFragment", "Selected image URI: $selectedImageUri")
-                    petImage = selectedImageUri.toString()
-                    recyclerView.adapter?.notifyItemChanged(1) // Update UI
-                }
-            }
-        }
+//        filePickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+//            if (result.resultCode == AppCompatActivity.RESULT_OK) {
+//                val selectedImageUri = result.data?.data
+//                if (selectedImageUri != null) {
+//                    Log.d("FormAddPetFragment", "Selected image URI: $selectedImageUri")
+//                    petImage = selectedImageUri.toString()
+//                    recyclerView.adapter?.notifyItemChanged(1) // Update UI
+//                }
+//            }
+//        }
         submitButton = rootView.findViewById<Button>(R.id.addpet_submit_btn)
         submitButton.setOnClickListener {
             val petData = mutableMapOf<String, Any>()
@@ -119,6 +127,8 @@ class FormAddPetFragment : Fragment() {
                     Log.d("FormAddPetFragment", "Key: $key, Value: $value")
 
                     if (key == "Profile Picture") {
+                        Log.d("pfp", value)
+
                         if (value.isNotEmpty()) {
                             try {
                                 val uri = Uri.parse(value) // Parse the URI string
@@ -196,5 +206,12 @@ class FormAddPetFragment : Fragment() {
             Log.e("FormAddPetFragment", "Failed to load default image", e)
             null
         }
+    }
+
+    public fun setPetImageURI(uri: String) {
+        Log.d("called", uri)
+        petImage = uri
+        formEntries[1] = uri
+        recyclerView.adapter?.notifyItemChanged(1) // Update UI
     }
 }

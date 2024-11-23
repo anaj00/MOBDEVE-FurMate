@@ -1,22 +1,33 @@
 package com.example.furmate.adapter
 
+import android.app.Activity.RESULT_OK
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
 import android.content.Intent
+import android.graphics.BitmapFactory
+import android.graphics.drawable.BitmapDrawable
+import android.net.Uri
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import androidx.recyclerview.widget.RecyclerView
+import com.example.furmate.HomeActivity
 import com.example.furmate.R
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.timepicker.MaterialTimePicker
+import com.google.android.material.timepicker.TimeFormat
+import com.squareup.picasso.Picasso
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 class ComposableInputAdapter(
     private val hints: List<String>,
@@ -65,11 +76,25 @@ class ComposableInputAdapter(
             "File", "Image", "Profile Picture" -> {
                 holder.inputLayout.endIconMode = TextInputLayout.END_ICON_CUSTOM
                 holder.inputLayout.setEndIconDrawable(android.R.drawable.ic_menu_gallery)
+
+
+                // Handle click on the end icon
                 holder.inputLayout.setEndIconOnClickListener {
                     openFileChooser(holder.inputText)
                 }
             }
         }
+    }
+
+
+    private fun openFileChooser(inputField: TextInputEditText) {
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+            type = "image/*" // Use "image/*" for images only
+            addCategory(Intent.CATEGORY_OPENABLE)
+        }
+
+        (context as HomeActivity).getFile.launch(intent)
+
     }
 
     override fun getItemCount(): Int = hints.size
@@ -92,14 +117,6 @@ class ComposableInputAdapter(
             val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
             inputField.setText(dateFormat.format(calendar.time))
         }
-    }
-
-    private fun openFileChooser(inputField: TextInputEditText) {
-        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-            type = "image/*"
-            addCategory(Intent.CATEGORY_OPENABLE)
-        }
-        (context as AppCompatActivity).startActivityForResult(intent, REQUEST_FILE_PICKER)
     }
 
     fun setInputEnabled(isEnabled: Boolean) {
