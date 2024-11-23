@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">FurMate</string>
+
+    <string name="facebook_app_id">9073251449393560</string>
+    <string name="fb_login_protocol_scheme">fb9073251449393560</string>
+    <string name="facebook_client_token">32f3a4f88e356a2fea33efa690035593</string>
 </resources>

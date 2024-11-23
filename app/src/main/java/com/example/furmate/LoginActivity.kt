@@ -9,6 +9,11 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import com.facebook.CallbackManager
+import com.facebook.FacebookCallback
+import com.facebook.FacebookException
+import com.facebook.login.LoginManager
+import com.facebook.login.LoginResult
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -17,27 +22,30 @@ import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.textfield.TextInputEditText
+import com.google.firebase.auth.FacebookAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
-import com.facebook.FacebookSdk;
-import com.facebook.appevents.AppEventsLogger;
 
 class LoginActivity : AppCompatActivity() {
     private val GOOGLE_ANDROID_CLIENT_ID = "5695861005-kihkqrp31tltjh6pkkdrc2sfas3g74nc.apps.googleusercontent.com"
     private val GOOGLE_WEB_CLIENT_ID = "5695861005-97f1jrsg9v08f2hib1d5o1td0gfo98bl.apps.googleusercontent.com"
     private val RC_SIGN_IN = 1
 
-    private val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+    private val googleSignInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
         .requestEmail()
         .requestIdToken(GOOGLE_WEB_CLIENT_ID)
         .build()
 
     private lateinit var googleSignInClient: GoogleSignInClient
+
+    private val facebookCallbackManager = CallbackManager.Factory.create()
+    private val facebookLoginManager = LoginManager.getInstance()
 
     private lateinit var auth: FirebaseAuth
     private lateinit var formRegister: View
@@ -51,7 +59,8 @@ class LoginActivity : AppCompatActivity() {
         // initialize FirebaseAuth object
         auth = Firebase.auth
 
-        googleSignInClient = GoogleSignIn.getClient(this, gso);
+        // initialize google sign in
+        googleSignInClient = GoogleSignIn.getClient(this, googleSignInOptions);
 
         formRegister = findViewById<View>(R.id.form_register)
         formLogin = findViewById<View>(R.id.form_login)
@@ -62,6 +71,7 @@ class LoginActivity : AppCompatActivity() {
         handleCreateAccount()
         handleLogin()
         handleGoogleLogin()
+        handleFacebookLogin()
 
         // If the user logged out from HomeActivity, logout additional sign-in providers
         val googleLogout = intent.getBooleanExtra("KEY_GOOGLE_LOGOUT", false)
@@ -71,7 +81,9 @@ class LoginActivity : AppCompatActivity() {
             googleSignInClient.signOut()
         }
 
-        // TODO: Implement Facebook logout
+        if (facebookLogout) {
+            facebookLoginManager.logOut()
+        }
 
         // If there is already a logged-in user, go directly to homeactivity
         if (auth.currentUser != null) {
@@ -126,9 +138,48 @@ class LoginActivity : AppCompatActivity() {
     private fun loginGoogle() {
         val signInIntent: Intent = googleSignInClient.signInIntent
         startActivityForResult(signInIntent, RC_SIGN_IN)
+        // once sign in is complete, receive results in onActivityResult()
+    }
+
+    private fun handleFacebookLogin() {
+        facebookLoginManager.registerCallback(facebookCallbackManager,
+            object : FacebookCallback<LoginResult> {
+                override fun onSuccess(result: LoginResult) {
+                    val credential = FacebookAuthProvider.getCredential(result.accessToken.token)
+                    auth.signInWithCredential(credential).addOnSuccessListener {
+                        goToHomeScreen()
+                    }.addOnFailureListener { e ->
+                        if (e is FirebaseAuthUserCollisionException) {
+                            Toast.makeText(this@LoginActivity, e.message, Toast.LENGTH_LONG).show()
+                        }
+
+                        Log.e("Facebook login error", e.toString())
+                    }
+                }
+
+                override fun onCancel() {
+                    Log.d("Facebook Login", "Cancel")
+                }
+
+                override fun onError(error: FacebookException) {
+                    Log.d("Facebook Login Error", error.toString())
+                }
+            })
+
+        val facebookLoginButton = findViewById<MaterialCardView>(R.id.facebook_btn)
+        facebookLoginButton.setOnClickListener {
+            facebookLoginButton.isEnabled = false
+            loginFacebook()
+            facebookLoginButton.isEnabled = true
+        }
+    }
+
+    private fun loginFacebook() {
+        facebookLoginManager.logInWithReadPermissions(this, arrayListOf("email"))
     }
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        facebookCallbackManager.onActivityResult(requestCode, resultCode, data)
         super.onActivityResult(requestCode, resultCode, data)
 
         // google login is complete

@@ -140,7 +140,9 @@ class HomeActivity : AppCompatActivity(), FragmentNavigator {
                     googleLogout = true
                 }
 
-                // TODO: Implement Facebook Logout check
+                if (providerId == "facebook.com") {
+                    facebookLogout = true
+                }
 
                 Log.d("UserProvider", providerId)
             }
