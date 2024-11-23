@@ -70,7 +70,7 @@ class ComposableInputAdapter(
 
     private fun openFileChooser(inputField: TextInputEditText) {
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-            type = "*/*" // Use "image/*" for images only
+            type = "image/*" // Use "image/*" for images only
             addCategory(Intent.CATEGORY_OPENABLE)
         }
 
