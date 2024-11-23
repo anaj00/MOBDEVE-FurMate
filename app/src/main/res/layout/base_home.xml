@@ -28,7 +28,8 @@
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="Profile Button"
                 android:scaleType="fitEnd"
-                android:src="@drawable/paw" />
+                android:src="@drawable/user"
+                android:tint="#FFFFFF" />
         </androidx.appcompat.widget.Toolbar>
     </com.google.android.material.appbar.AppBarLayout>
 

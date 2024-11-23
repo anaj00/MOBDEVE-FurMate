@@ -92,8 +92,8 @@ class PetProfileFragment : Fragment() {
         TabLayoutMediator(tabLayout, viewPager) { tab, position ->
             tab.icon = when (position) {
                 0 -> resources.getDrawable(R.drawable.profile, null) // Replace with your profile icon drawable
-                1 -> resources.getDrawable(R.drawable.schedule, null) // Replace with your schedule icon drawable
-                2 -> resources.getDrawable(R.drawable.record, null) // Replace with your records icon drawable
+                1 -> resources.getDrawable(R.drawable.record, null) // Replace with your schedule icon drawable
+                2 -> resources.getDrawable(R.drawable.schedule, null) // Replace with your records icon drawable
                 else -> null
             }
         }.attach()
