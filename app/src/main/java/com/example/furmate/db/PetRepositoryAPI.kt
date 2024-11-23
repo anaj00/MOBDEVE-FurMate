@@ -20,22 +20,6 @@ class PetRepositoryAPI (private val collection: CollectionReference) {
             }
     }
 
-    // Query all schedules for a specific pet
-    fun getPetSchedules(petId: Int, taskCollection: CollectionReference) {
-        Log.d("PetRepositoryAPI", "Attempting to get all schedules of pet from Firestore")
-
-        taskCollection
-            .whereEqualTo("pet", petId)
-            .get()
-            .addOnSuccessListener { result ->
-                for (document in result) {
-                    Log.d("FireStore", "${document.id} => ${document.data}")
-                }
-            }
-            .addOnFailureListener { exception ->
-                Log.e("FireStore", "Error getting documents: ", exception)
-            }
-    }
 
     fun getAllPets(callback: (List<Pet>?, Exception?) -> Unit) {
         collection
@@ -47,7 +31,9 @@ class PetRepositoryAPI (private val collection: CollectionReference) {
                         name = document.getString("name") ?: "",
                         animal = document.getString("animal") ?: "",
                         birthday = document.getString("birthday") ?: "",
-                        notes = document.getString("notes")
+                        weight = document.getString("weight") ?: "",
+                        notes = document.getString("notes"),
+                        userID = document.getString("userID") ?: ""
                     )
                 }
                 callback(pets, null)
@@ -69,7 +55,9 @@ class PetRepositoryAPI (private val collection: CollectionReference) {
                         name = it.getString("name") ?: "Unknown",
                         animal = it.getString("animal") ?: "Unknown",
                         birthday = it.getString("birthday") ?: "Unkown",
-                        notes = it.getString("notes")
+                        weight = it.getString("weight") ?: "Unknown",
+                        notes = it.getString("notes"),
+                        userID = it.getString("userID") ?: "Unknown"
                     )
                 }
                 callback(pet, null)

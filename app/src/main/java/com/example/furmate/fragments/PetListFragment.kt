@@ -95,6 +95,7 @@ class PetsFragment : Fragment() {
     }
 
     private fun openAddPetForm() {
+        Log.d("PetListFragment", "Navigating to FormAddPetFragment")
         val fragment = FormAddPetFragment()
         parentFragmentManager.commit {
             setReorderingAllowed(true)

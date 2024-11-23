@@ -4,6 +4,7 @@ import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -44,6 +45,7 @@ class ComposableInputAdapter(
         if (prefilledValues[position].isNotEmpty()) {
             holder.inputText.setText(prefilledValues[position])
         }
+        Log.d("ComposableInputAdapter", "Hint: $hint, Prefilled Value: ${prefilledValues.getOrNull(position)}")
 
         when (hint) {
             "Date", "Birthday" -> {

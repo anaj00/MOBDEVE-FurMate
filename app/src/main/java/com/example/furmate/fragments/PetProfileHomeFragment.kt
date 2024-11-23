@@ -71,31 +71,6 @@ class PetProfileHomeFragment : Fragment() {
         val adapter = ComposableInputAdapter(composableInputs(), inputValues(), requireContext())
         recyclerView.adapter = adapter
 
-        // TODO: Make it save right away.
-        //  Maybe when user presses back or changes screen or after a specfic amount of time?
-//        submitButton.setOnClickListener {
-//            val petData = mutableMapOf<String, String>()
-//
-//            for ( child in recyclerView.children) {
-//                val holder = recyclerView.getChildViewHolder(child)
-//                val key = holder.itemView.findViewById<TextInputLayout>(R.id.enter_hint_div).hint.toString()
-//                val value = holder.itemView.findViewById<TextInputEditText>(R.id.input_field).text.toString()
-//
-//                petData[key] = value
-//            }
-//
-//            Log.d("FormAddPetFragment", "Pet data: $petData")
-//
-//            val pet = Pet(
-//                name = petData["Name"]!!,
-//                animal = petData["Animal"]!!,
-//                birthday = petData["Birthday"]!!,
-//                notes = petData["Notes"]!!
-//
-//            )
-//
-//            petRepositoryAPI.addPet(pet)
-//        }
         return rootView
     }
 }

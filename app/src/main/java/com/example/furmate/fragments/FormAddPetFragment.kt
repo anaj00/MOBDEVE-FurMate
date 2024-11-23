@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.Toast
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -18,6 +19,8 @@ import com.example.furmate.models.Task
 import com.example.furmate.utils.MarginItemDecoration
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlin.collections.any
@@ -57,13 +60,12 @@ class FormAddPetFragment : Fragment() {
         petRepositoryAPI = PetRepositoryAPI(petCollection)
 
         val composableInputs = {
-            listOf("Name", "Profile Picture", "Breed", "Sex", "Birthday", "Weight", "Notes")
+            listOf("Name", "Breed", "Sex", "Birthday", "Weight", "Notes")
         }
 
         val inputValues = {
             listOf(
                 petName ?: "",
-                petImage ?: "",
                 petBreed ?: "",
                 petSex ?: "",
                 petBirthday ?: "",
@@ -72,6 +74,10 @@ class FormAddPetFragment : Fragment() {
             )
         }
 
+        // Log the data being passed to the adapter
+        Log.d("FormAddPetFragment", "Composable Inputs: ${composableInputs()}")
+        Log.d("FormAddPetFragment", "Input Values: ${inputValues()}")
+
         val adapter = ComposableInputAdapter(composableInputs(), inputValues(), requireContext())
         recyclerView.adapter = adapter
 
@@ -79,26 +85,39 @@ class FormAddPetFragment : Fragment() {
         submitButton.setOnClickListener {
             val petData = mutableMapOf<String, String>()
 
-            for (child in recyclerView.children) {
-                val holder = recyclerView.getChildViewHolder(child)
-                val key = holder.itemView.findViewById<TextInputLayout>(R.id.enter_hint_div).hint.toString()
-                val value = holder.itemView.findViewById<TextInputEditText>(R.id.input_field).text.toString()
+            recyclerView.post {
+                for (child in recyclerView.children) {
+                    val holder = recyclerView.getChildViewHolder(child)
+                    val key = holder.itemView.findViewById<TextInputLayout>(R.id.enter_hint_div)?.hint.toString()
+                    val value = holder.itemView.findViewById<TextInputEditText>(R.id.input_field)?.text.toString()
 
-                petData[key] = value
+                    Log.d("FormAddPetFragment", "Key: $key, Value: $value")
+                    petData[key] = value
+                }
+
+                Log.d("FormAddPetFragment", "Final Pet Data: $petData")
+
+                val name = petData["Name"]
+                if (name.isNullOrEmpty()) {
+                    Log.e("FormAddPetFragment", "Name is missing or empty!")
+                    Toast.makeText(requireContext(), "Name is required.", Toast.LENGTH_SHORT).show()
+                    return@post
+                }
+
+                val uid = Firebase.auth.currentUser?.uid ?: ""
+                val pet = Pet(
+                    name = name, // Safe access
+                    animal = petData["Breed"] ?: "Unknown", // Provide defaults for optional fields
+                    birthday = petData["Birthday"] ?: "Unknown",
+                    weight = petData["Weight"] ?: "Unknown",
+                    notes = petData["Notes"] ?: "",
+                    userID = uid
+                )
+
+                petRepositoryAPI.addPet(pet)
+                Log.d("FormAddPetFragment", "Pet added successfully: $pet")
+                requireActivity().onBackPressedDispatcher.onBackPressed()
             }
-
-            Log.d("FormAddPetFragment", "Pet data: $petData")
-
-            val pet = Pet(
-                name = petData["Name"]!!,
-                animal = petData["Animal"]!!,
-                birthday = petData["Birthday"]!!,
-                notes = petData["Notes"]!!
-
-            )
-
-            petRepositoryAPI.addPet(pet)
-            requireActivity().onBackPressedDispatcher.onBackPressed()
         }
         return rootView
     }
