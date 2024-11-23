@@ -2,6 +2,7 @@ package com.example.furmate.db
 
 import android.util.Log
 import com.example.furmate.models.Book
+import com.example.furmate.models.Task
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.CollectionReference
@@ -23,16 +24,17 @@ class BookRepositoryAPI (private val collection: CollectionReference) {
             }
     }
 
-    fun getAllBooks(callback: (List<Book>?, Exception?) -> Unit) {
+    fun getAllBooks(petID: String, callback: (List<Book>?, Exception?) -> Unit) {
         val uid = Firebase.auth.currentUser?.uid
 
         if (uid == null) {
             callback(null, Exception("User is not logged in."))
             return
         }
-
+        Log.d("FormAddBookFragment", "petID in API call: $petID")
         collection
             .whereEqualTo("userID", uid)
+            .whereEqualTo("petID", petID)
             .get()
             .addOnSuccessListener { result ->
                 val books = result.map { document ->
@@ -43,10 +45,38 @@ class BookRepositoryAPI (private val collection: CollectionReference) {
                         petID = document.getString("petID") ?: ""
                     )
                 }
+                Log.d("BookRepositoryAPI", "Books: $books")
                 callback(books, null)
             }
             .addOnFailureListener { e ->
                 callback(null, e)
+            }
+    }
+
+    fun getAllRecords(bookID: String, collection: CollectionReference, callback: (List<com.example.furmate.models.Record>?, Exception?) -> Unit) {
+        val uid = Firebase.auth.currentUser?.uid
+
+        if (uid == null) {
+            callback(null, Exception("User is not logged in."))
+            return
+        }
+        Log.d("FormAddBookFragment", "bookID in API call: $bookID")
+
+        collection
+            .whereEqualTo("userID", uid)
+            .whereEqualTo("bookID", bookID)
+            .get()
+            .addOnSuccessListener { result ->
+                val records = result.map { document ->
+                    com.example.furmate.models.Record(
+                        id = document.id,
+                        name = document.getString("name") ?: "",
+                        userID = document.getString("userID") ?: "",
+                        bookID = document.getString("bookID") ?: ""
+                    )
+                }
+                Log.d("BookRepositoryAPI", "Books: $records")
+                callback(records, null)
             }
     }
 }

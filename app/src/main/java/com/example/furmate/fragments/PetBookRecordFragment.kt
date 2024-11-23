@@ -7,18 +7,25 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentHostCallback
 import androidx.gridlayout.widget.GridLayout
 import com.example.furmate.db.BookRepositoryAPI
 import com.example.furmate.fragments.FormAddBookFragment
 import com.example.furmate.models.Book
 import com.example.furmate.models.Task
+import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 
 class PetBookRecordFragment : Fragment() {
     private lateinit var bookRepositoryAPI: BookRepositoryAPI
 
     companion object {
-        fun newInstance(): PetBookRecordFragment {
+        private const val ARG_BOOK_ID = "book_id"
+        fun newInstance(bookID: String): PetBookRecordFragment {
+            val fragment = PetBookRecordFragment()
+            val args = Bundle()
+            args.putString(ARG_BOOK_ID, bookID)
+            fragment.arguments = args
             return PetBookRecordFragment()
         }
     }
@@ -39,32 +46,6 @@ class PetBookRecordFragment : Fragment() {
         val firestore = FirebaseFirestore.getInstance()
         val bookCollection = firestore.collection("Books")
         bookRepositoryAPI = BookRepositoryAPI(bookCollection)
-
-
-        getAllBooks { books, error ->
-            if (error != null) {
-                // Handle error
-                Log.e("PetBookRecordFragment", "Error fetching books: $error")
-                return@getAllBooks
-            }
-
-            // Add a button to add a new record
-            val recordAdd = inflater.inflate(R.layout.button_addpet, gridLayout, false)
-            recordAdd.post {
-                val width = recordAdd.width
-                val layoutParams = recordAdd.layoutParams
-                layoutParams.height = width
-                recordAdd.layoutParams = layoutParams
-            }
-
-        }
-
-
-
-
-
-
-
 
 
         // Dynamically add record items to GridLayout
@@ -132,12 +113,12 @@ class PetBookRecordFragment : Fragment() {
         )
     }
 
-    private fun getAllBooks (callback: (List<Book>?, Exception?) -> Unit) {
-        bookRepositoryAPI.getAllBooks { books, error ->
+    private fun getAllRecords(bookID: String, collection: CollectionReference,callback: (List<com.example.furmate.models.Record>?, Exception?) -> Unit) {
+        bookRepositoryAPI.getAllRecords(bookID, collection) { records, error ->
             if (error != null) {
                 callback(null, error) // Pass the error to the callback
             } else {
-                callback(books, null) // Pass the fetched
+                callback(records, null) // Pass the fetched
             }
         }
     }

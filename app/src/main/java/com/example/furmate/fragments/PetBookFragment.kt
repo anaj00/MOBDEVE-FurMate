@@ -25,8 +25,8 @@ class PetBookFragment : Fragment() {
             val fragment = PetBookFragment()
             val args = Bundle()
             args.putString(ARG_PET_ID, petID)
-            Log.d("FormAddBookFragment", "Pet ID: $petID in pet book")
-            fragment.arguments = args
+            fragment.arguments = args // Set arguments before logging
+            Log.d("FormAddBookFragment", "Pet ID set in arguments: ${fragment.arguments?.getString(ARG_PET_ID)}")
             return fragment
         }
     }
@@ -44,7 +44,7 @@ class PetBookFragment : Fragment() {
         val bookCollection = firestore.collection("Book")
         bookRepositoryAPI = BookRepositoryAPI(bookCollection)
 
-        getAllBooks { books, error ->
+        getAllBooks(arguments?.getString(ARG_PET_ID) ?: "Unkown"){ books, error ->
             if (error != null) {
                 // Handle error
                 Log.e("PetBookFragment", "Error fetching books: $error")
@@ -86,7 +86,7 @@ class PetBookFragment : Fragment() {
                     }
 
                     bookItemView.setOnClickListener {
-                        openBookProfile()
+                        openBookProfile(book.id?: "unkown")
                     }
 
                     // Add the book item to the GridLayout
@@ -98,18 +98,18 @@ class PetBookFragment : Fragment() {
         return rootView
     }
 
-    private fun openBookProfile() {
-        val fragment = PetBookRecordFragment.newInstance()
+    private fun openBookProfile(bookID: String) {
+        val fragment = PetBookRecordFragment.newInstance(bookID)
         (requireActivity() as FragmentNavigator).navigateToFragment(fragment)
     }
 
     private fun openAddBookForm() {
-        val fragment = FormAddBookFragment.newInstance(ARG_PET_ID)
+        val fragment = FormAddBookFragment.newInstance(arguments?.getString(ARG_PET_ID) ?: "null")
         (requireActivity() as FragmentNavigator).navigateToFragment(fragment)
     }
 
-    private fun getAllBooks (callback: (List<Book>?, Exception?) -> Unit) {
-        bookRepositoryAPI.getAllBooks { books, error ->
+    private fun getAllBooks (petID: String, callback: (List<Book>?, Exception?) -> Unit) {
+        bookRepositoryAPI.getAllBooks(petID) { books, error ->
             if (error != null) {
                 callback(null, error) // Pass the error to the callback
             } else {

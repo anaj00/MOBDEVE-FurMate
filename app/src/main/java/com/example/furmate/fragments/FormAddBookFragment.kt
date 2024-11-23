@@ -17,6 +17,7 @@ import com.example.furmate.R
 import com.example.furmate.adapter.ComposableInputAdapter
 import com.example.furmate.db.BookRepositoryAPI
 import com.example.furmate.db.PetRepositoryAPI
+import com.example.furmate.fragments.PetProfileFragment.Companion
 import com.example.furmate.models.Book
 import com.example.furmate.models.Pet
 import com.example.furmate.utils.MarginItemDecoration
@@ -48,6 +49,7 @@ class FormAddBookFragment : Fragment() {
             val args = Bundle()
             args.putString(ARG_PET_ID, petID) // Pass petID in the Bundle
             fragment.arguments = args
+            Log.d("FormAddBookFragment", "Pet ID: ${fragment.arguments} in form add book")
             return fragment
         }
     }
@@ -103,7 +105,7 @@ class FormAddBookFragment : Fragment() {
                     name = bookData["Name"] as? String ?: "unknown",
                     notes = bookData["Notes"] as? String ?: "unknown",
                     userID = Firebase.auth.currentUser?.uid ?: "unknown",
-                    petID = ARG_PET_ID ?: "unknown",
+                    petID = arguments?.getString(ARG_PET_ID)?: "unknown",
                 )
 
                 Log.d("FormAddBookFragment", "Final Pet Data: $book")
