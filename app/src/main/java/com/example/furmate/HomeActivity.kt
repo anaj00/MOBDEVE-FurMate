@@ -8,6 +8,8 @@ import android.os.Bundle
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
+import android.widget.ImageButton
+import android.widget.PopupMenu
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
@@ -48,6 +50,8 @@ class HomeActivity : AppCompatActivity(), FragmentNavigator {
     private lateinit var scheduleFAB: ExtendedFloatingActionButton
     private lateinit var recordFAB: ExtendedFloatingActionButton
 
+    private lateinit var profileButton: ImageButton
+
     override fun onCreate(savedInstanceState: Bundle?) {
         /*
         testCreateAccount()
@@ -60,10 +64,10 @@ class HomeActivity : AppCompatActivity(), FragmentNavigator {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.base_home)
 
-        // Initialize the FABs once
         mainFAB = findViewById(R.id.add_fab)
         scheduleFAB = findViewById(R.id.add_schedule)
         recordFAB = findViewById(R.id.add_record)
+        profileButton = findViewById(R.id.profile_button)
 
         val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_navigation)
 
@@ -101,6 +105,24 @@ class HomeActivity : AppCompatActivity(), FragmentNavigator {
         recordFAB.setOnClickListener {
             openFormSchedule(isSchedule = false)
         }
+
+        val profileButton: ImageButton = findViewById(R.id.profile_button)
+
+        profileButton.setOnClickListener {
+            val popupMenu = PopupMenu(this, it)
+            popupMenu.menuInflater.inflate(R.menu.profile_menu, popupMenu.menu)
+            popupMenu.setOnMenuItemClickListener { item ->
+                when (item.itemId) {
+                    R.id.logout -> {
+                        // Handle logout
+                        true
+                    }
+                    else -> false
+                }
+            }
+            popupMenu.show()
+        }
+
 
 
     }
