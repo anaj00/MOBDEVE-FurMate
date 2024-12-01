@@ -117,9 +117,4 @@ class PetsFragment : Fragment() {
             }
         }
     }
-
-    public fun sendImageURIToAddPetFragment(uri: String) {
-        addPetFragment.setPetImageURI(uri)
-    }
-
 }

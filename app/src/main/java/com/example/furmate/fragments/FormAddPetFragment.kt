@@ -54,9 +54,17 @@ class FormAddPetFragment : Fragment() {
     // APIs
     private lateinit var petRepositoryAPI: PetRepositoryAPI
 
-    private lateinit var filePickerLauncher: ActivityResultLauncher<Intent>
-
     private lateinit var formEntries: ArrayList<String>
+
+    private val filePickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == AppCompatActivity.RESULT_OK) {
+            val selectedImageUri = result.data?.data
+            if (selectedImageUri != null) {
+                Log.d("FormAddPetFragment", "Selected image URI: $selectedImageUri")
+                setPetImageURI(selectedImageUri.toString())
+            }
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -101,19 +109,9 @@ class FormAddPetFragment : Fragment() {
         Log.d("FormAddPetFragment", "Composable Inputs: ${composableInputs()}")
         Log.d("FormAddPetFragment", "Input Values: $formEntries")
 
-        val adapter = ComposableInputAdapter(composableInputs(), formEntries, requireContext())
+        val adapter = ComposableInputAdapter(composableInputs(), formEntries, requireContext(), filePickerLauncher)
         recyclerView.adapter = adapter
 
-//        filePickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-//            if (result.resultCode == AppCompatActivity.RESULT_OK) {
-//                val selectedImageUri = result.data?.data
-//                if (selectedImageUri != null) {
-//                    Log.d("FormAddPetFragment", "Selected image URI: $selectedImageUri")
-//                    petImage = selectedImageUri.toString()
-//                    recyclerView.adapter?.notifyItemChanged(1) // Update UI
-//                }
-//            }
-//        }
         submitButton = rootView.findViewById<Button>(R.id.addpet_submit_btn)
         submitButton.setOnClickListener {
             val petData = mutableMapOf<String, Any>()
@@ -208,7 +206,7 @@ class FormAddPetFragment : Fragment() {
         }
     }
 
-    public fun setPetImageURI(uri: String) {
+    private fun setPetImageURI(uri: String) {
         Log.d("called", uri)
         petImage = uri
         formEntries[1] = uri

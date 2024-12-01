@@ -56,22 +56,6 @@ class HomeActivity : AppCompatActivity(), FragmentNavigator {
 
     private lateinit var profileButton: ImageButton
 
-    val getFile = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result: ActivityResult ->
-        if (result.resultCode == RESULT_OK) {
-            val selectedImageURI = result.data?.data
-            if (selectedImageURI != null) {
-                val image = selectedImageURI.toString()
-
-                val currentFragment = fragments[this.currentFragmentName]
-                if (currentFragment is PetsFragment) {
-                    currentFragment.sendImageURIToAddPetFragment(image)
-                }
-            }
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         /*
         testCreateAccount()

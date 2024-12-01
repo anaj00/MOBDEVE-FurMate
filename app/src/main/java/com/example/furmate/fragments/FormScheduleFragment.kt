@@ -148,9 +148,9 @@ class FormScheduleFragment() : Fragment() {
                 if (key.isNotEmpty() && value.isNotEmpty()) {
                     taskData[key] = if (key == "date") {
                         // Ensure the date is always in a consistent format
-                        val inputFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+                        val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
                         val parsedDate = inputFormat.parse(value)
-                        val outputFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+                        val outputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
                         parsedDate?.let { outputFormat.format(it) } ?: value
                     } else {
                         value
@@ -186,7 +186,7 @@ class FormScheduleFragment() : Fragment() {
                 } else {
                     // Add the record to the Firestore database
                     val record = Task(
-                        name = taskData["Title"]!!,
+                        name = taskData["Name"]!!,
                         petName = taskData["Pet"]!!,
                         notes = taskData["Notes"]
                     )

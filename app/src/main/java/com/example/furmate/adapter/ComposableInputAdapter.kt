@@ -13,6 +13,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.textfield.TextInputEditText
@@ -32,7 +33,8 @@ import java.util.concurrent.TimeUnit
 class ComposableInputAdapter(
     private val hints: List<String>,
     private val prefilledValues: List<String>,
-    private val context: Context
+    private val context: Context,
+    private val filePickerLauncher: ActivityResultLauncher<Intent>? = null
 ) : RecyclerView.Adapter<ComposableInputAdapter.InputViewHolder>() {
 
     private val inputState = mutableMapOf<Int, Boolean>() // Track input enabled/disabled state
@@ -93,8 +95,7 @@ class ComposableInputAdapter(
             addCategory(Intent.CATEGORY_OPENABLE)
         }
 
-        (context as HomeActivity).getFile.launch(intent)
-
+        filePickerLauncher?.launch(intent)
     }
 
     override fun getItemCount(): Int = hints.size
