@@ -129,25 +129,19 @@ class FormScheduleFragment() : Fragment() {
 
         // Pre-fill the fields if task data exists
         formEntries = ArrayList();
-        val defaultInputValues = if (taskTitle != null) {
-            if (isSchedule!!) {
-                listOf(
-                    taskTitle ?: "",
-                    taskDate ?: "",
-                    taskPet ?: "",
-                    taskNotes ?: ""
-                )
-            } else {
-                listOf(taskTitle ?: "",
-                    taskPet ?: "",
-                    taskNotes ?: "")
+        if (taskTitle == null) {
+            for (i in 1..composableInputs.size) {
+                formEntries.add("")
             }
+        } else if (isSchedule!!) {
+            formEntries.add(taskTitle ?: "")
+            formEntries.add(taskDate ?: "")
+            formEntries.add(taskPet ?: "")
+            formEntries.add(taskNotes ?: "")
         } else {
-            List(composableInputs.size) { "" } // Empty strings for new entries
-        }
-
-        for (value in defaultInputValues) {
-            formEntries.add(value)
+            formEntries.add(taskTitle ?: "")
+            formEntries.add(taskPet ?: "")
+            formEntries.add(taskNotes ?: "")
         }
 
         if (formEntries.any { it.isNotEmpty() }) {
@@ -202,7 +196,7 @@ class FormScheduleFragment() : Fragment() {
                     // Add the task to the Firestore database
                     val task = Task(
                         name = taskData["name"] ?: "",
-                        date = taskData["date"] ?: "1970-01-01 00:00", // Default date value
+                        date = taskData["date"] ?: "1970-01-01", // Default date value
                         petName = taskData["petName"] ?: "",
                         notes = taskData["notes"]
                     )

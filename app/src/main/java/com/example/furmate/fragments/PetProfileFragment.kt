@@ -50,7 +50,6 @@ class PetProfileFragment : Fragment() {
         val petCollection = firestore.collection("Pet") // Adjust collection name as needed
         petRepositoryAPI = PetRepositoryAPI(petCollection)
 
-
         // Get references to TabLayout and ViewPager2
         val tabLayout = view.findViewById<TabLayout>(R.id.pet_tabs)
         val viewPager = view.findViewById<ViewPager2>(R.id.view_pager)

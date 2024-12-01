@@ -39,7 +39,6 @@ import java.io.ByteArrayOutputStream
 import kotlin.collections.any
 
 class FormAddPetFragment : Fragment() {
-
     private var petName: String? = null
     private var petImage: String? = null
     private var petBreed: String? = null
@@ -82,30 +81,22 @@ class FormAddPetFragment : Fragment() {
         // Initialize the Firestore instance
         val firestore = FirebaseFirestore.getInstance()
 
-        // Initilize the Firestore collection
+        // Initialize the Firestore collection
         petCollection = firestore.collection("Pet")
         petRepositoryAPI = PetRepositoryAPI(petCollection)
 
+        // initialize the ArrayList representing the form values
         formEntries = ArrayList()
+        formEntries.add(petName ?: "")
+        formEntries.add(petImage ?: "")
+        formEntries.add(petBreed ?: "")
+        formEntries.add(petSex ?: "")
+        formEntries.add(petBirthday ?: "")
+        formEntries.add(petWeight ?: "")
+        formEntries.add(petNotes ?: "")
 
         val composableInputs = {
             listOf("Name", "Profile Picture", "Breed", "Sex", "Birthday", "Weight", "Notes")
-        }
-
-        val inputValues = {
-            listOf(
-                petName ?: "",
-                petImage ?: "",
-                petBreed ?: "",
-                petSex ?: "",
-                petBirthday ?: "",
-                petWeight ?: "",
-                petNotes ?: ""
-            )
-        }
-
-        for (value in inputValues()) {
-            formEntries.add(value)
         }
 
         // Log the data being passed to the adapter
@@ -116,68 +107,71 @@ class FormAddPetFragment : Fragment() {
         recyclerView.adapter = adapter
 
         submitButton = rootView.findViewById<Button>(R.id.addpet_submit_btn)
-        submitButton.setOnClickListener {
-            val petData = mutableMapOf<String, Any>()
+        submitButton.setOnClickListener { onSubmit() }
 
-            recyclerView.post {
-                for (child in recyclerView.children) {
-                    val holder = recyclerView.getChildViewHolder(child)
-                    val key = holder.itemView.findViewById<TextInputLayout>(R.id.enter_hint_div)?.hint.toString()
-                    val value = holder.itemView.findViewById<TextInputEditText>(R.id.input_field)?.text.toString()
-
-                    Log.d("FormAddPetFragment", "Key: $key, Value: $value")
-
-                    if (key == "Profile Picture") {
-                        Log.d("pfp", value)
-
-                        if (value.isNotEmpty()) {
-                            try {
-                                val uri = Uri.parse(value) // Parse the URI string
-                                val blob = uriToBlob(uri, requireContext()) // Convert to Blob
-                                if (blob != null) {
-                                    Log.d("FormAddPetFragment", "Profile Picture is now a blob")
-                                    petData[key] = blob
-                                } else {
-                                    Log.e("FormAddPetFragment", "Failed to convert URI to Blob for Profile Picture")
-                                }
-                            } catch (e: Exception) {
-                                Log.e("FormAddPetFragment", "Invalid URI for Profile Picture: $value", e)
-                            }
-                        } else {
-                            Log.e("FormAddPetFragment", "Profile Picture is empty!")
-                            petData[key] = getDefaultImageBlob(requireContext()) ?: return@post
-                        }
-
-                    } else{
-                        petData[key] = value
-                    }
-                }
-
-                Log.d("FormAddPetFragment", "Final Pet Data: $petData")
-
-                val name = petData["Name"] as? String
-                if (name.isNullOrEmpty()) {
-                    Log.e("FormAddPetFragment", "Name is missing or empty!")
-                    Toast.makeText(requireContext(), "Name is required.", Toast.LENGTH_SHORT).show()
-                    return@post
-                }
-
-                val uid = Firebase.auth.currentUser?.uid ?: ""
-                val pet = Pet(
-                    name = name, // Safe access
-                    image = petData["Profile Picture"] as? Blob,
-                    animal = petData["Breed"] as? String ?: "Unknown", // Provide defaults for optional fields
-                    birthday = petData["Birthday"] as? String ?: "Unknown",
-                    weight = petData["Weight"] as? String ?: "Unknown",
-                    notes = petData["Notes"] as? String ?: "",
-                    userID = uid
-                )
-
-                petRepositoryAPI.addPet(pet)
-                Log.d("FormAddPetFragment", "Pet added successfully: $pet")
-                requireActivity().onBackPressedDispatcher.onBackPressed()
-            }
-        }
         return rootView
+    }
+
+    private fun onSubmit() {
+        val petData = mutableMapOf<String, Any>()
+
+        recyclerView.post {
+            for (child in recyclerView.children) {
+                val holder = recyclerView.getChildViewHolder(child)
+                val key = holder.itemView.findViewById<TextInputLayout>(R.id.enter_hint_div)?.hint.toString()
+                val value = holder.itemView.findViewById<TextInputEditText>(R.id.input_field)?.text.toString()
+
+                Log.d("FormAddPetFragment", "Key: $key, Value: $value")
+
+                if (key == "Profile Picture") {
+                    Log.d("pfp", value)
+
+                    if (value.isNotEmpty()) {
+                        try {
+                            val uri = Uri.parse(value) // Parse the URI string
+                            val blob = uriToBlob(uri, requireContext()) // Convert to Blob
+                            if (blob != null) {
+                                Log.d("FormAddPetFragment", "Profile Picture is now a blob")
+                                petData[key] = blob
+                            } else {
+                                Log.e("FormAddPetFragment", "Failed to convert URI to Blob for Profile Picture")
+                            }
+                        } catch (e: Exception) {
+                            Log.e("FormAddPetFragment", "Invalid URI for Profile Picture: $value", e)
+                        }
+                    } else {
+                        Log.e("FormAddPetFragment", "Profile Picture is empty!")
+                        petData[key] = getDefaultImageBlob(requireContext()) ?: return@post
+                    }
+
+                } else{
+                    petData[key] = value
+                }
+            }
+
+            Log.d("FormAddPetFragment", "Final Pet Data: $petData")
+
+            val name = petData["Name"] as? String
+            if (name.isNullOrEmpty()) {
+                Log.e("FormAddPetFragment", "Name is missing or empty!")
+                Toast.makeText(requireContext(), "Name is required.", Toast.LENGTH_SHORT).show()
+                return@post
+            }
+
+            val uid = Firebase.auth.currentUser?.uid ?: ""
+            val pet = Pet(
+                name = name, // Safe access
+                image = petData["Profile Picture"] as? Blob,
+                animal = petData["Breed"] as? String ?: "Unknown", // Provide defaults for optional fields
+                birthday = petData["Birthday"] as? String ?: "Unknown",
+                weight = petData["Weight"] as? String ?: "Unknown",
+                notes = petData["Notes"] as? String ?: "",
+                userID = uid
+            )
+
+            petRepositoryAPI.addPet(pet)
+            Log.d("FormAddPetFragment", "Pet added successfully: $pet")
+            requireActivity().onBackPressedDispatcher.onBackPressed()
+        }
     }
 }
