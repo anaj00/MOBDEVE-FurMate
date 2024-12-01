@@ -26,6 +26,8 @@ import com.example.furmate.db.PetRepositoryAPI
 import com.example.furmate.models.Pet
 import com.example.furmate.models.Task
 import com.example.furmate.utils.MarginItemDecoration
+import com.example.furmate.utils.URIToBlob.Companion.getDefaultImageBlob
+import com.example.furmate.utils.URIToBlob.Companion.uriToBlob
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.Firebase
@@ -61,7 +63,8 @@ class FormAddPetFragment : Fragment() {
             val selectedImageUri = result.data?.data
             if (selectedImageUri != null) {
                 Log.d("FormAddPetFragment", "Selected image URI: $selectedImageUri")
-                setPetImageURI(selectedImageUri.toString())
+                formEntries[1] = selectedImageUri.toString()
+                recyclerView.adapter?.notifyItemChanged(1) // Update UI
             }
         }
     }
@@ -176,40 +179,5 @@ class FormAddPetFragment : Fragment() {
             }
         }
         return rootView
-    }
-
-
-    private fun uriToBlob(uri: Uri, context: Context): Blob? {
-        try {
-            val inputStream = context.contentResolver.openInputStream(uri)
-            val bitmap = BitmapFactory.decodeStream(inputStream)
-            val byteArrayOutputStream = ByteArrayOutputStream()
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream)
-            val byteArray = byteArrayOutputStream.toByteArray()
-            return Blob.fromBytes(byteArray)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return null
-        }
-    }
-
-    fun getDefaultImageBlob(context: Context): Blob? {
-        return try {
-            val bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.home)
-            val byteArrayOutputStream = ByteArrayOutputStream()
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream)
-            val byteArray = byteArrayOutputStream.toByteArray()
-            Blob.fromBytes(byteArray)
-        } catch (e: Exception) {
-            Log.e("FormAddPetFragment", "Failed to load default image", e)
-            null
-        }
-    }
-
-    private fun setPetImageURI(uri: String) {
-        Log.d("called", uri)
-        petImage = uri
-        formEntries[1] = uri
-        recyclerView.adapter?.notifyItemChanged(1) // Update UI
     }
 }

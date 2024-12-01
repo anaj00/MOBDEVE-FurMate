@@ -64,7 +64,6 @@ class HomeActivity : AppCompatActivity(), FragmentNavigator {
         testSendPasswordResetEmail("justinlim4916@gmail.com")
         */
 
-
         super.onCreate(savedInstanceState)
         setContentView(R.layout.base_home)
 

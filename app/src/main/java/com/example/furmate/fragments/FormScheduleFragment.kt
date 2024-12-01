@@ -1,5 +1,6 @@
 package com.example.furmate
 
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -7,6 +8,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -15,13 +18,15 @@ import com.example.furmate.adapter.ComposableInputAdapter
 import com.example.furmate.db.TaskRepositoryAPI
 import com.example.furmate.models.Task
 import com.example.furmate.utils.MarginItemDecoration
+import com.example.furmate.utils.URIToBlob.Companion.uriToBlob
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import com.google.firebase.firestore.Blob
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
+import java.net.URI
 import java.text.SimpleDateFormat
 import java.util.Locale
-import kotlin.math.log
 
 
 class FormScheduleFragment() : Fragment() {
@@ -37,6 +42,7 @@ class FormScheduleFragment() : Fragment() {
     private lateinit var submitButton: Button
 
     private lateinit var recyclerView: RecyclerView
+    private lateinit var formEntries: ArrayList<String>
 
     // Firestore Collections
     private lateinit var scheduleCollection: CollectionReference
@@ -49,8 +55,19 @@ class FormScheduleFragment() : Fragment() {
         "Title" to "name",
         "Date" to "date",
         "Pet" to "petName",
-        "Notes" to "notes"
+        "Notes" to "notes",
+        "Image" to "image"
     )
+
+    private val filePickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == AppCompatActivity.RESULT_OK) {
+            val selectedImageUri = result.data?.data
+            if (selectedImageUri != null) {
+                formEntries[3] = selectedImageUri.toString()
+                recyclerView.adapter?.notifyItemChanged(3) // Update UI
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -111,26 +128,33 @@ class FormScheduleFragment() : Fragment() {
         }
 
         // Pre-fill the fields if task data exists
-        val inputValues = if (taskTitle != null) {
+        formEntries = ArrayList();
+        val defaultInputValues = if (taskTitle != null) {
             if (isSchedule!!) {
-                listOf(taskTitle ?: "",
-                        taskDate ?: "",
-                        taskPet ?: "",
-                        taskNotes ?: "")
+                listOf(
+                    taskTitle ?: "",
+                    taskDate ?: "",
+                    taskPet ?: "",
+                    taskNotes ?: ""
+                )
             } else {
                 listOf(taskTitle ?: "",
-                        taskPet ?: "",
-                        taskNotes ?: "")
+                    taskPet ?: "",
+                    taskNotes ?: "")
             }
         } else {
             List(composableInputs.size) { "" } // Empty strings for new entries
         }
 
-        if (inputValues.any { it.isNotEmpty() }) {
+        for (value in defaultInputValues) {
+            formEntries.add(value)
+        }
+
+        if (formEntries.any { it.isNotEmpty() }) {
             header.visibility = View.GONE
         }
 
-        val adapter = ComposableInputAdapter(composableInputs, inputValues, requireContext())
+        val adapter = ComposableInputAdapter(composableInputs, formEntries, requireContext(), filePickerLauncher)
         recyclerView.adapter = adapter
 
         submitButton = rootView.findViewById(R.id.submit_btn);
@@ -185,10 +209,17 @@ class FormScheduleFragment() : Fragment() {
                     taskRepositoryAPI.addTask(task)
                 } else {
                     // Add the record to the Firestore database
+                    var imageBlob: Blob? = null;
+                    taskData["image"]?.let {
+                        imageBlob = uriToBlob(Uri.parse(it), requireContext())
+                    }
+
                     val record = Task(
-                        name = taskData["Name"]!!,
-                        petName = taskData["Pet"]!!,
-                        notes = taskData["Notes"]
+                        name = taskData["name"] ?: "",
+                        petName = taskData["petName"] ?: "",
+                        notes = taskData["notes"] ?: "",
+                        imageURI = taskData["image"] ?: "",
+                        image = imageBlob
                     )
                     taskRepositoryAPI.addTask(record)
                     Log.d("FormScheduleFragment", "Record submitted")
