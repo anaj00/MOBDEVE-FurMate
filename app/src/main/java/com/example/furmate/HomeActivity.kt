@@ -33,7 +33,6 @@ import com.squareup.picasso.Picasso
 import java.io.ByteArrayOutputStream
 import java.util.concurrent.Executors
 
-
 class HomeActivity : AppCompatActivity(), FragmentNavigator {
     companion object {
         enum class FragmentName {
@@ -57,13 +56,6 @@ class HomeActivity : AppCompatActivity(), FragmentNavigator {
     private lateinit var profileButton: ImageButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        /*
-        testCreateAccount()
-        testImageUpload()
-        testGetDataFromFirestore()
-        testSendPasswordResetEmail("justinlim4916@gmail.com")
-        */
-
         super.onCreate(savedInstanceState)
         setContentView(R.layout.base_home)
 
@@ -80,19 +72,11 @@ class HomeActivity : AppCompatActivity(), FragmentNavigator {
         // Handle bottom navigation item clicks
         bottomNavigationView.setOnNavigationItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.home -> {
-                    loadFragment(FragmentName.HOME.name)
-                    showFABs()
-                }
-                R.id.calendar -> {
-                    loadFragment(FragmentName.CALENDAR.name)
-                    showFABs()
-                }
-                R.id.pets -> {
-                    loadFragment(FragmentName.PETS.name)
-                    showFABs()
-                }
+                R.id.home -> loadFragment(FragmentName.HOME.name)
+                R.id.calendar -> loadFragment(FragmentName.CALENDAR.name)
+                R.id.pets -> loadFragment(FragmentName.PETS.name)
             }
+            showFABs()
             true
         }
 
@@ -274,91 +258,11 @@ class HomeActivity : AppCompatActivity(), FragmentNavigator {
 
         // Call the default onBackPressed behavior to pop the fragment back stack
         super.onBackPressed()
-
-
     }
 
     private fun showFABs() {
         mainFAB.visibility = View.VISIBLE
         scheduleFAB.visibility = View.GONE // Keep these hidden until the main FAB is clicked again
         recordFAB.visibility = View.GONE
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        Log.d("HomeActivity", "onactivityresult called with $requestCode $resultCode $data")
-    }
-
-    // TEMP: CODE SNIPPETS FOR TESTING
-    // TO BE REMOVED FOR FINAL OUTPUT
-
-    // Get all documents from "Sample" Collection
-    private fun testGetDataFromFirestore() {
-        val db = Firebase.firestore
-        val sampleRef = db.collection("Sample")
-        sampleRef.get()
-            .addOnSuccessListener {documents ->
-                for (document in documents) {
-                    Log.d("Firestore Output", "${document.id} => ${document.data}")
-                }
-            }
-            .addOnFailureListener {exception ->
-                Log.w("Firestore Error", "Error getting documents: ", exception)
-            }
-    }
-
-    // Create a new user account
-    private fun testCreateAccount() {
-        val auth = Firebase.auth
-
-        auth.createUserWithEmailAndPassword("juan_dela_cruz@gmail.com", "password")
-            .addOnCompleteListener(this) { task ->
-                if (task.isSuccessful) {
-                    Log.d("Auth", "Successfully created user")
-                } else {
-                    Log.w("Auth Failure", "createUserWithEmail:failure", task.exception)
-                }
-            }
-    }
-
-    // Send a password reset email
-    private fun testSendPasswordResetEmail(email: String) {
-        FirebaseAuth.getInstance().sendPasswordResetEmail(email)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    Log.d("Password Reset Email", "Email sent.")
-                }
-            }
-    }
-
-    // Upload a bytearray of the Google logo to Firestore
-    private fun testImageUpload() {
-        val ex = Executors.newSingleThreadExecutor()
-        ex.execute {
-            val bitmap = Picasso.get()
-                .load(R.drawable.google)
-                .get()
-
-            val baos = ByteArrayOutputStream()
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos)
-            val bytearray = baos.toByteArray()
-
-            val imageBlob = Blob.fromBytes(bytearray)
-
-            val db = Firebase.firestore
-            val sampleRef = db.collection("Sample")
-            val data = hashMapOf(
-                "ImageBlob" to imageBlob
-            )
-            sampleRef.add(data)
-                .addOnSuccessListener {
-                    Log.d("ImageUpload", "Success")
-                }
-                .addOnFailureListener {exception ->
-                    Log.w("ImageUpload Error", exception)
-                }
-
-        }
     }
 }
