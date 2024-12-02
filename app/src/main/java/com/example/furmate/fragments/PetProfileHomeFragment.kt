@@ -63,7 +63,23 @@ class PetProfileHomeFragment : Fragment() {
         // Toggle all inputs when the edit button is clicked
         editButton.setOnClickListener {
             areInputsEnabled = !areInputsEnabled // Toggle state
-            adapter.setInputEnabled(areInputsEnabled) // Apply the new state to all inputs
+            adapter.setInputEnabled(areInputsEnabled)
+
+            // Update the button's appearance
+            val color = if (areInputsEnabled) {
+                ContextCompat.getColor(requireContext(), R.color.success)
+            } else {
+                ContextCompat.getColor(requireContext(), R.color.primary)
+            }
+            val drawable = ContextCompat.getDrawable(requireContext(), R.drawable.circle)
+            drawable?.mutate()?.setTint(color) // Apply tint to change color dynamically
+            editButton.background = drawable
+            editButton.setImageDrawable(
+                ContextCompat.getDrawable(
+                    requireContext(),
+                    if (areInputsEnabled) R.drawable.success else R.drawable.edit
+                )
+            )
         }
 
         return rootView

@@ -7,4 +7,5 @@
     <color name="black">#0A0A0A</color>
     <color name="white">#FAFAFA</color>
     <color name="off_white">#F5F5F5</color>
+    <color name="success">#43a047</color>
 </resources>
