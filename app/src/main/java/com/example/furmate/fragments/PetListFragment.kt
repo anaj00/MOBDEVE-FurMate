@@ -7,6 +7,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.gridlayout.widget.GridLayout
+import com.example.furmate.HomeActivity
 import com.example.furmate.R
 import com.example.furmate.db.PetRepositoryAPI
 import com.example.furmate.fragments.FormAddPetFragment
@@ -24,6 +25,7 @@ class PetsFragment : Fragment() {
     ): View? {
         // Inflate the fragment layout
         val rootView = inflater.inflate(R.layout.screen_pets, container, false)
+        (requireActivity() as? HomeActivity)?.changeToolbarTitle("Pets")
 
         // Find the GridLayout in the layout
         val gridLayout = rootView.findViewById<GridLayout>(R.id.grid_layout_pets)

@@ -10,6 +10,7 @@ import androidx.fragment.app.FragmentHostCallback
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.furmate.FormScheduleFragment
+import com.example.furmate.HomeActivity
 import com.example.furmate.R
 import com.example.furmate.adapter.TaskAdapter
 import com.example.furmate.db.TaskRepositoryAPI
@@ -35,6 +36,7 @@ class CalendarFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val rootView = inflater.inflate(R.layout.screen_calendar, container, false)
+        (requireActivity() as? HomeActivity)?.changeToolbarTitle("Calendar")
 
         val calendarView = rootView.findViewById<CalendarView>(R.id.calendar_dates)
         val dateHeader = rootView.findViewById<TextView>(R.id.date_header)

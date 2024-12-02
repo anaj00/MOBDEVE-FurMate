@@ -46,6 +46,7 @@ class PetProfileHomeFragment : Fragment() {
         editButton = rootView.findViewById(R.id.edit_btn)
 
         val composableInputs = listOf("Name", "Breed", "Sex", "Birthday", "Weight", "Notes")
+        (requireActivity() as? HomeActivity)?.changeToolbarTitle(petName + "'s Records")
         val inputValues = listOf(
             petName ?: "",
             petBreed ?: "",

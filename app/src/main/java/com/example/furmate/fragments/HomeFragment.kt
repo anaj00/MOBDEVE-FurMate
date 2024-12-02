@@ -43,6 +43,7 @@ class HomeFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val rootView = inflater.inflate(R.layout.screen_home, container, false)
+        (requireActivity() as? HomeActivity)?.changeToolbarTitle("Home")
 
         // Initialize API collection
         val firestore = FirebaseFirestore.getInstance()
@@ -143,6 +144,7 @@ class HomeFragment : Fragment() {
                 }
             }
     }
+
     // Function to open a task in detail (or open a form with pre-filled data)
     private fun openTaskDetail(task: Task) {
         // Ensure the parent activity is HomeActivity and hide FABs
@@ -164,7 +166,6 @@ class HomeFragment : Fragment() {
             .addToBackStack(HomeActivity.Companion.FragmentName.HOME.name)
             .commit()
     }
-
 
     override fun onDestroyView() {
         super.onDestroyView()

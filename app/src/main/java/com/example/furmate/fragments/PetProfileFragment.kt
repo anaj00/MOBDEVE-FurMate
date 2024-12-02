@@ -9,6 +9,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
+import com.example.furmate.HomeActivity
 import com.example.furmate.PetProfileHomeFragment
 import com.example.furmate.PetBookFragment
 import com.example.furmate.PetScheduleFragment
@@ -65,6 +66,7 @@ class PetProfileFragment : Fragment() {
                 } else if (pet != null) {
                     // Populate UI with pet details
                     petNameTextView.text = pet.name
+                    (requireActivity() as? HomeActivity)?.changeToolbarTitle(pet.name + "'s Profile")
                 } else {
                     petNameTextView.text = "Pet not found"
                 }
@@ -80,7 +82,9 @@ class PetProfileFragment : Fragment() {
             override fun getItemCount(): Int = 3
             override fun createFragment(position: Int): Fragment {
                 return when (position) {
-                    0 -> PetProfileHomeFragment.newInstance()
+                    0 -> {PetProfileHomeFragment.newInstance()
+
+                    }
                     1 ->{
                         val petID = arguments?.getString(ARG_PET_ID)
                         if (petID.isNullOrEmpty()) {
@@ -99,9 +103,9 @@ class PetProfileFragment : Fragment() {
 
         TabLayoutMediator(tabLayout, viewPager) { tab, position ->
             tab.icon = when (position) {
-                0 -> resources.getDrawable(R.drawable.profile, null) // Replace with your profile icon drawable
-                1 -> resources.getDrawable(R.drawable.record, null) // Replace with your schedule icon drawable
-                2 -> resources.getDrawable(R.drawable.schedule, null) // Replace with your records icon drawable
+                0 -> resources.getDrawable(R.drawable.profile, null)
+                1 -> resources.getDrawable(R.drawable.record, null)
+                2 -> resources.getDrawable(R.drawable.schedule, null)
                 else -> null
             }
         }.attach()

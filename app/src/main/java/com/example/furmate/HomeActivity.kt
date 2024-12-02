@@ -54,6 +54,7 @@ class HomeActivity : AppCompatActivity(), FragmentNavigator {
     private lateinit var recordFAB: ExtendedFloatingActionButton
 
     private lateinit var profileButton: ImageButton
+    private lateinit var toolbar: androidx.appcompat.widget.Toolbar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,6 +64,7 @@ class HomeActivity : AppCompatActivity(), FragmentNavigator {
         scheduleFAB = findViewById(R.id.add_schedule)
         recordFAB = findViewById(R.id.add_record)
         profileButton = findViewById(R.id.profile_button)
+        toolbar = findViewById(R.id.top_toolbar)
 
         val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_navigation)
 
@@ -109,6 +111,10 @@ class HomeActivity : AppCompatActivity(), FragmentNavigator {
             }
             popupMenu.show()
         }
+    }
+
+    fun changeToolbarTitle(title: String) {
+        toolbar.title = title
     }
 
     fun logOut() {
