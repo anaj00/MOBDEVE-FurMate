@@ -71,6 +71,8 @@ class BookRepositoryAPI (private val collection: CollectionReference) {
                     com.example.furmate.models.Record(
                         id = document.id,
                         name = document.getString("name") ?: "",
+                        petName = document.getString("petName") ?: "",
+                        notes = document.getString("notes") ?: "",
                         userID = document.getString("userID") ?: "",
                         bookID = document.getString("bookID") ?: ""
                     )

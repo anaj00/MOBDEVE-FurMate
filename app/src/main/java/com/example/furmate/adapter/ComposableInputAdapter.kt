@@ -61,6 +61,8 @@ class ComposableInputAdapter(
         val hint = hints[position]
         holder.inputLayout.hint = hint
 
+        Log.d("ComposableInputAdapter", "Binding item at position: $position, hint: $hint")
+
         if (prefilledValues[position].isNotEmpty()) {
             holder.inputText.setText(prefilledValues[position])
         }
@@ -85,7 +87,12 @@ class ComposableInputAdapter(
                     openFileChooser(holder.inputText)
                 }
             }
+            else -> {
+                // Default behavior for other hints
+                holder.inputText.isEnabled = true  // Ensure the field is enabled
+            }
         }
+        Log.d("ComposableInputAdapter", "onBindViewHolder: $hint")
     }
 
 

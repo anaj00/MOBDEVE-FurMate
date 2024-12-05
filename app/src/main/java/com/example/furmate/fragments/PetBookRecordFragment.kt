@@ -7,12 +7,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentHostCallback
 import androidx.gridlayout.widget.GridLayout
 import com.example.furmate.db.BookRepositoryAPI
-import com.example.furmate.fragments.FormAddBookFragment
-import com.example.furmate.models.Book
-import com.example.furmate.models.Task
+import com.example.furmate.fragments.FormScheduleFragment
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 

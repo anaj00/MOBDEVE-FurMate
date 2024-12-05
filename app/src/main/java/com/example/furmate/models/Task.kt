@@ -10,7 +10,6 @@ data class Task(
     var petName: String = "",
     var notes: String? = null,
     var userID: String? = null,
-    var bookID: String? = null,
     var imageURI: String? =null,
     var image: Blob? = null
 )

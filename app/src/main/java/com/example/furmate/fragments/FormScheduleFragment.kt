@@ -1,4 +1,4 @@
-package com.example.furmate
+package com.example.furmate.fragments
 
 import android.net.Uri
 import android.os.Bundle
@@ -14,17 +14,21 @@ import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.furmate.R
 import com.example.furmate.adapter.ComposableInputAdapter
+import com.example.furmate.db.RecordRepositoryAPI
 import com.example.furmate.db.TaskRepositoryAPI
+import com.example.furmate.models.Record
 import com.example.furmate.models.Task
 import com.example.furmate.utils.MarginItemDecoration
 import com.example.furmate.utils.URIToBlob.Companion.uriToBlob
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import com.google.firebase.firestore.Blob
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
-import java.net.URI
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -50,6 +54,7 @@ class FormScheduleFragment() : Fragment() {
 
     // APIs
     private lateinit var taskRepositoryAPI: TaskRepositoryAPI
+    private lateinit var recordRepositoryAPI: RecordRepositoryAPI
 
     private val hintToFieldMap = mapOf(
         "Title" to "name",
@@ -93,6 +98,11 @@ class FormScheduleFragment() : Fragment() {
         }
 
         isEditMode = documentId != null
+//        Log.d("FormScheduleFragment", "isSchedule: $isSchedule")
+//        Log.d("FormScheduleFragment", "taskTitle: $taskTitle")
+//        Log.d("FormScheduleFragment", "taskDate: $taskDate")
+//        Log.d("FormScheduleFragment", "taskWhere: $taskWhere")
+//        Log.d("FormScheduleFragment", "taskNotes: $taskNotes")
     }
 
     override fun onCreateView(
@@ -117,7 +127,7 @@ class FormScheduleFragment() : Fragment() {
             header.text = "Add a new schedule"
         } else {
             recordCollection = firestore.collection("Record")
-            taskRepositoryAPI = TaskRepositoryAPI(recordCollection)
+            recordRepositoryAPI = RecordRepositoryAPI(recordCollection)
             header.text = "Add a new record"
         }
 
@@ -147,8 +157,9 @@ class FormScheduleFragment() : Fragment() {
         if (formEntries.any { it.isNotEmpty() }) {
             header.visibility = View.GONE
         }
-
+        Log.d("FormScheduleFragment", "Form Entries: $formEntries")
         val adapter = ComposableInputAdapter(composableInputs, formEntries, requireContext(), filePickerLauncher)
+        Log.d("FormScheduleFragment", "composableInputs: $composableInputs")
         recyclerView.adapter = adapter
 
         submitButton = rootView.findViewById(R.id.submit_btn);
@@ -207,20 +218,22 @@ class FormScheduleFragment() : Fragment() {
                     taskData["image"]?.let {
                         imageBlob = uriToBlob(Uri.parse(it), requireContext())
                     }
-
-                    val record = Task(
+                    val userID = Firebase.auth.currentUser?.uid ?: ""
+                    val record = Record(
                         name = taskData["name"] ?: "",
                         petName = taskData["petName"] ?: "",
                         notes = taskData["notes"] ?: "",
                         imageURI = taskData["image"] ?: "",
-                        image = imageBlob
+                        image = imageBlob,
+                        userID = userID,
+                        bookID = "",
                     )
-                    taskRepositoryAPI.addTask(record)
+                    recordRepositoryAPI.addRecord(record)
                     Log.d("FormScheduleFragment", "Record submitted")
                 }
             }
             // Test for differentiating the return value
-            Log.d("FormScheduleFragment", "onCreateView: $taskData")
+//            Log.d("FormScheduleFragment", "onCreateView: $taskData")
             requireActivity().onBackPressedDispatcher.onBackPressed()
         }
 

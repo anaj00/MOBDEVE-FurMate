@@ -9,8 +9,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.furmate.FormScheduleFragment
-import com.example.furmate.R
+import com.example.furmate.fragments.FormScheduleFragment
 import com.example.furmate.adapter.TaskAdapter
 import com.example.furmate.db.TaskRepositoryAPI
 import com.example.furmate.models.Task

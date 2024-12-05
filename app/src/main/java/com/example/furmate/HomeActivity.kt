@@ -3,7 +3,6 @@ package com.example.furmate
 import CalendarFragment
 import PetsFragment
 import android.content.Intent
-import android.graphics.Bitmap
 import android.graphics.Rect
 import android.os.Bundle
 import android.util.Log
@@ -11,27 +10,18 @@ import android.view.MotionEvent
 import android.view.View
 import android.widget.ImageButton
 import android.widget.PopupMenu
-import androidx.activity.result.ActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.transition.TransitionManager
 import com.example.furmate.fragments.HomeFragment
-import com.example.furmate.FragmentNavigator
-import com.example.furmate.adapter.ComposableInputAdapter
+import com.example.furmate.fragments.FormScheduleFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.transition.MaterialFadeThrough
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.Blob
-import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import com.squareup.picasso.Picasso
-import java.io.ByteArrayOutputStream
-import java.util.concurrent.Executors
 
 class HomeActivity : AppCompatActivity(), FragmentNavigator {
     companion object {
