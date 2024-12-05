@@ -87,15 +87,12 @@ class HomeFragment : Fragment() {
     private fun observeTodayTasks(todayRecyclerView: RecyclerView) {
         val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
         val formattedDate = dateFormat.format(dateFormat.parse(todayDate)!!)
-        val startOfDay = "$formattedDate 00:00"
-        val endOfDay = "$formattedDate 23:59"
-        Log.d("HomeFragment", "Start of day: $startOfDay, End of day: $endOfDay")
+        Log.d("HomeFragment", "Day: $todayDate")
 
         scheduleTodaySnapshotListener?.remove() // Remove previous listener if exists
 
         scheduleTodaySnapshotListener = scheduleCollection
-            .whereGreaterThanOrEqualTo("date", startOfDay)
-            .whereLessThanOrEqualTo("date", endOfDay)
+            .whereEqualTo("date", formattedDate)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
                     Log.w("HomeFragment", "Error listening for today tasks.", error)
