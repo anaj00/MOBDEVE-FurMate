@@ -146,15 +146,17 @@ class HomeFragment : Fragment() {
         // Ensure the parent activity is HomeActivity and hide FABs
         (activity as? HomeActivity)?.hideFABs()
 
+        Log.d("HomeFragment", "Task ID: ${task.id}")
 
         // Handle task click and open the form with pre-filled task details
         val fragment = FormScheduleFragment.Companion.newInstance(
             isSchedule = true,
             title = task.name,
             date = task.date,
-            where = "Location",  // Add relevant data here
-            pet = "Pet Name",     // Add relevant data here
-            notes = "Notes"       // Add relevant data here
+            where = null,
+            pet = task.petName,
+            notes = task.notes,
+            documentId = task.id
         )
         parentFragmentManager.beginTransaction()
             .setReorderingAllowed(true)
