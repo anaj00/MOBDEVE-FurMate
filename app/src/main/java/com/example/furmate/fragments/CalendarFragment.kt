@@ -94,15 +94,13 @@ class CalendarFragment : Fragment() {
 
     // Populate the RecyclerView with tasks for the selected date
     private fun observeTasksByDate(date: String) {
-        val startOfDay = "$date 00:00"
-        val endOfDay = "$date 23:59"
+        Log.d("CalendarFragment", "observeTasksByDate called with date $date")
 
         // Remove previous listener if it exists
         snapshotListenerRegistration?.remove()
 
         snapshotListenerRegistration = scheduleCollection
-            .whereGreaterThanOrEqualTo("date", startOfDay)
-            .whereLessThanOrEqualTo("date", endOfDay)
+            .whereEqualTo("date", date)
             .addSnapshotListener { snapshots, error ->
                 if (error != null) {
                     Log.e("CalendarFragment", "Error listening for tasks", error)
