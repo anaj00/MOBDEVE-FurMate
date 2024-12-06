@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -154,21 +155,35 @@ class PetProfileHomeFragment : Fragment() {
         deleteButton.setOnClickListener {
             val petID = arguments?.getString(ARG_PET_ID)
             if (petID != null) {
+                // Perform the deletion operation
                 petRepositoryAPI.deletePet(petID) { success, error ->
                     if (success) {
                         Log.d("PetProfileHomeFragment", "Pet deleted successfully.")
+
+                        // Check if the fragment is still attached to avoid IllegalStateException
+                        if (isAdded) {
+                            Toast.makeText(requireContext(), "Pet deleted successfully.", Toast.LENGTH_SHORT).show()
+                        }
                     } else {
                         Log.e("PetProfileHomeFragment", "Failed to delete pet: $error")
+
+                        // Check if the fragment is still attached before showing the toast
+                        if (isAdded) {
+                            Toast.makeText(requireContext(), "Failed to delete pet. Please try again.", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+
+                    // After deletion, notify the adapter if needed
+                    adapter.notifyDataSetChanged()
+
+                    // Pop the current fragment from the back stack
+                    if (isAdded) {
+                        requireActivity().onBackPressed() // This will pop the current fragment from the stack
                     }
                 }
             }
-            adapter.notifyDataSetChanged()
-            val petListFragment = PetsFragment()
-
-            val fragmentTransaction = parentFragmentManager.beginTransaction()
-            fragmentTransaction.replace(R.id.fragment_container, petListFragment) // Replace current fragment with PetListFragment
-            fragmentTransaction.commit()
         }
+
 
         return rootView
     }

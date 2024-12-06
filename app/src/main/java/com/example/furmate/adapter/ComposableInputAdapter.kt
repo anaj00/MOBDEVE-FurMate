@@ -136,12 +136,10 @@ class ComposableInputAdapter(
                 holder.spinner.adapter = spinnerAdapter
 
                 // Set previously selected value, if any
-                // If the prefilled value doesn't match any of the options, select the first option.
                 val selectedPosition = spinnerAdapter.getPosition(prefilledValue)
                 if (selectedPosition >= 0) {
                     holder.spinner.setSelection(selectedPosition)
                 } else {
-                    // Set a default selection if prefilledValue is empty or invalid
                     holder.spinner.setSelection(0) // Select the first option by default
                 }
 
@@ -185,8 +183,8 @@ class ComposableInputAdapter(
         // Update the state for all inputs
         for (i in inputState.keys) {
             inputState[i] = isEnabled
-            notifyItemChanged(i) // Refresh only the affected items
         }
+        notifyDataSetChanged() // Refresh the entire adapter
     }
 
     private fun toggleInput(view: View, isEnabled: Boolean) {
