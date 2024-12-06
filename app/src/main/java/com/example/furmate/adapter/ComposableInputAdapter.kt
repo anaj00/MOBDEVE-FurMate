@@ -19,6 +19,7 @@ import com.example.furmate.R
 import com.google.android.material.datepicker.MaterialDatePicker
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.math.log
 
 class ComposableInputAdapter(
     private val hints: List<String>,
@@ -28,6 +29,8 @@ class ComposableInputAdapter(
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val inputState = mutableMapOf<Int, Boolean>() // Track input enabled/disabled state
+    private var petOptions: List<String> = listOf() // Default pet options
+    private var bookOptions: List<String> = listOf() // Default book options
 
     companion object {
         const val TYPE_TEXT_INPUT = 0
@@ -120,8 +123,8 @@ class ComposableInputAdapter(
 
                 // Define different sets of options based on the field (hint)
                 val options: List<String> = when (hint) {
-                    "Pet" -> listOf("Pet", "Booboo", "Bird", "Rabbit") // TODO: Add the options
-                    "Book" -> listOf("Book", "Non-fiction", "Science Fiction", "Fantasy") // TODO: Add the options
+                    "Pet" -> petOptions // Use the pet options
+                    "Book" -> bookOptions // Use the book options
                     else -> listOf("Option 1", "Option 2", "Option 3") // Default options
                 }
 
@@ -192,5 +195,13 @@ class ComposableInputAdapter(
     private fun toggleInput(view: View, isEnabled: Boolean) {
         view.isEnabled = isEnabled
         view.alpha = if (isEnabled) 1.0f else 0.5f
+    }
+
+    fun updateDropdownOptions(petOptions: List<String>, bookOptions: List<String>) {
+        this.petOptions = petOptions
+        this.bookOptions = bookOptions
+        Log.d("ComposableInputAdapter", "Pet options: $petOptions")
+        Log.d("ComposableInputAdapter", "Book options: $bookOptions")
+        notifyDataSetChanged() // Notify that data has changed to refresh the views
     }
 }

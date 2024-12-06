@@ -74,7 +74,6 @@ class BookRepositoryAPI (private val collection: CollectionReference) {
                         petName = document.getString("petName") ?: "",
                         notes = document.getString("notes") ?: "",
                         userID = document.getString("userID") ?: "",
-                        bookID = document.getString("bookID") ?: ""
                     )
                 }
                 Log.d("BookRepositoryAPI", "Books: $records")

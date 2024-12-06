@@ -13,17 +13,22 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.furmate.HomeActivity
 import com.example.furmate.R
 import com.example.furmate.adapter.ComposableInputAdapter
+import com.example.furmate.db.BookRepositoryAPI
+import com.example.furmate.db.PetRepositoryAPI
 import com.example.furmate.db.RecordRepositoryAPI
 import com.example.furmate.db.TaskRepositoryAPI
 import com.example.furmate.models.Record
 import com.example.furmate.models.Task
 import com.example.furmate.utils.MarginItemDecoration
 import com.example.furmate.utils.URIToBlob.Companion.uriToBlob
+import com.example.furmate.viewmodels.FormScheduleViewModel
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.Firebase
@@ -57,6 +62,10 @@ class FormScheduleFragment() : Fragment() {
     // APIs
     private lateinit var taskRepositoryAPI: TaskRepositoryAPI
     private lateinit var recordRepositoryAPI: RecordRepositoryAPI
+    private lateinit var petRepositoryAPI: PetRepositoryAPI
+    private lateinit var bookRepositoryAPI: BookRepositoryAPI
+
+    private val formScheduleViewModel: FormScheduleViewModel by activityViewModels()
 
     private val hintToFieldMap = mapOf(
         "Title" to "name",
@@ -119,7 +128,8 @@ class FormScheduleFragment() : Fragment() {
 
         // Initialize the Firestore instance
         val firestore = FirebaseFirestore.getInstance()
-
+        petRepositoryAPI = PetRepositoryAPI(firestore.collection("Pet"))
+        bookRepositoryAPI = BookRepositoryAPI(firestore.collection("Book"))
         // Change the header depending on the form type
         val header = rootView.findViewById<TextView>(R.id.form_header)
         if (isSchedule!!) {
@@ -133,10 +143,13 @@ class FormScheduleFragment() : Fragment() {
             header.text = "Add a new record"
         }
 
+        // LOAD THE DATA TO THE DROPDOWN LIST
+        loadDropdownData()
+
         val composableInputs = if (isSchedule!!) {
             listOf("Title", "Date", "Pet", "Notes")
         } else {
-            listOf("Title", "Pet", "Book", "Image", "Notes")
+            listOf("Title", "Pet", "Image", "Notes")
         }
 
         // Pre-fill the fields if task data exists
@@ -159,7 +172,8 @@ class FormScheduleFragment() : Fragment() {
         if (formEntries.any { it.isNotEmpty() }) {
             header.visibility = View.GONE
         }
-        Log.d("FormScheduleFragment", "Form Entries: $formEntries")
+        Log.d("FormScheduleFragment", "Form Entries: $formEntries"
+        )
         val adapter = ComposableInputAdapter(composableInputs, formEntries, requireContext(), filePickerLauncher)
         Log.d("FormScheduleFragment", "composableInputs: $composableInputs")
         recyclerView.adapter = adapter
@@ -237,7 +251,6 @@ class FormScheduleFragment() : Fragment() {
                         imageURI = taskData["image"] ?: "",
                         image = imageBlob,
                         userID = userID,
-                        bookID = "",
                     )
                     recordRepositoryAPI.addRecord(record)
                     Log.d("FormScheduleFragment", "Record submitted")
@@ -250,7 +263,15 @@ class FormScheduleFragment() : Fragment() {
             requireActivity().onBackPressedDispatcher.onBackPressed()
         }
 
+        formScheduleViewModel.petOptions.observe(viewLifecycleOwner, Observer { petOptions ->
+            // Update the dropdown with pet options
+            adapter.updateDropdownOptions(petOptions, emptyList())  // Update only pets
+        })
 
+        formScheduleViewModel.bookOptions.observe(viewLifecycleOwner, Observer { bookOptions ->
+            // Update the dropdown with book options
+            adapter.updateDropdownOptions(emptyList(), bookOptions)  // Update only books
+        })
 
         return rootView
     }
@@ -278,6 +299,24 @@ class FormScheduleFragment() : Fragment() {
             }
         }
     }
+
+    private fun loadDropdownData() {
+        petRepositoryAPI.getAllPets { pets, exception ->
+            if (exception == null && pets != null) {
+                val petOptions = pets.map { it.name }  // Map the list of Pet objects to their names
+                Log.d("FormScheduleFragment", "Pet Options Loaded: $petOptions")
+                formScheduleViewModel.setPetOptions(petOptions)  // Set pet options in ViewModel
+            } else {
+                Log.e("FormScheduleFragment", "Failed to load pet options: $exception")
+            }
+        }
+
+        // Example for Book options
+        formScheduleViewModel.setBookOptions(listOf("Book 1", "Book 2", "Book 3"))
+    }
+
+
+
 
 
     companion object {

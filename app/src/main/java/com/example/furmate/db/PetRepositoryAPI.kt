@@ -26,6 +26,7 @@ class PetRepositoryAPI (private val collection: CollectionReference) {
     fun getAllPets(callback: (List<Pet>?, Exception?) -> Unit) {
         val uid = Firebase.auth.currentUser?.uid
         collection
+            .whereEqualTo("userID", uid)
             .get()
             .addOnSuccessListener { result ->
                 val pets = result.map { document ->

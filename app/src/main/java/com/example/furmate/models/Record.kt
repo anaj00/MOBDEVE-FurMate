@@ -10,5 +10,4 @@ data class Record (
     var imageURI: String? =null,
     var image:  Blob? = null,
     var userID: String,
-    var bookID: String,
 )
