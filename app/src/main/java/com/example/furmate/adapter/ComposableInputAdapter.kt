@@ -143,6 +143,7 @@ class ComposableInputAdapter(
         holder.inputText.alpha = if (isEnabled) 1.0f else 0.5f // Adjust opacity to reflect state
     }
 
+
     companion object {
         const val REQUEST_FILE_PICKER = 1001
     }

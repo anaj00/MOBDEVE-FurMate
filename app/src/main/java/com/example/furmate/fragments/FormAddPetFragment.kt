@@ -162,7 +162,8 @@ class FormAddPetFragment : Fragment() {
             val pet = Pet(
                 name = name, // Safe access
                 image = petData["Profile Picture"] as? Blob,
-                animal = petData["Breed"] as? String ?: "Unknown", // Provide defaults for optional fields
+                breed = petData["Breed"] as? String ?: "Some animal hopefully",
+                sex = petData["Sex"] as? String ?: "Unknown",
                 birthday = petData["Birthday"] as? String ?: "Unknown",
                 weight = petData["Weight"] as? String ?: "Unknown",
                 notes = petData["Notes"] as? String ?: "",

@@ -32,7 +32,8 @@ class PetRepositoryAPI (private val collection: CollectionReference) {
                     Pet(
                         id = document.id,
                         name = document.getString("name") ?: "",
-                        animal = document.getString("animal") ?: "",
+                        breed = document.getString("breed") ?: "",
+                        sex = document.getString("sex") ?: "",
                         birthday = document.getString("birthday") ?: "",
                         weight = document.getString("weight") ?: "",
                         notes = document.getString("notes"),
@@ -56,7 +57,8 @@ class PetRepositoryAPI (private val collection: CollectionReference) {
                     Pet(
                         id = it.getString("id"),
                         name = it.getString("name") ?: "Unknown",
-                        animal = it.getString("animal") ?: "Unknown",
+                        breed = it.getString("breed") ?: "Unknown",
+                        sex = it.getString("sex") ?: "Unknown",
                         birthday = it.getString("birthday") ?: "Unkown",
                         weight = it.getString("weight") ?: "Unknown",
                         notes = it.getString("notes"),

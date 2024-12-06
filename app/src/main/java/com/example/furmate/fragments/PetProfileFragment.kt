@@ -56,6 +56,7 @@ class PetProfileFragment : Fragment() {
         val viewPager = view.findViewById<ViewPager2>(R.id.view_pager)
         val petNameTextView = view.findViewById<TextView>(R.id.pet_name)
 
+
         // Get pet info
         val petId = arguments?.getString(ARG_PET_ID)
         if(petId != null) {
@@ -81,12 +82,13 @@ class PetProfileFragment : Fragment() {
         val adapter = object : FragmentStateAdapter(this) {
             override fun getItemCount(): Int = 3
             override fun createFragment(position: Int): Fragment {
+                val petID = arguments?.getString(ARG_PET_ID)
                 return when (position) {
-                    0 -> {PetProfileHomeFragment.newInstance()
-
+                    0 -> {
+                        Log.d("PetProfileFragment", "Creating PetProfileHomeFragment")
+                        PetProfileHomeFragment.newInstance(petID ?: "unknown")
                     }
                     1 ->{
-                        val petID = arguments?.getString(ARG_PET_ID)
                         if (petID.isNullOrEmpty()) {
                             Log.e("FormAddBookFragment", "petID is null or empty. Defaulting to 'unknown'")
                         } else {
