@@ -22,6 +22,7 @@ import com.example.furmate.utils.MarginItemDecoration
 import com.example.furmate.viewmodels.PetViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
+import com.google.firebase.firestore.Blob
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlin.math.log
@@ -33,6 +34,7 @@ class PetProfileHomeFragment : Fragment() {
     private var petBirthday: String? = null
     private var petWeight: String? = null
     private var petNotes: String? = null
+    private var petImage: Blob? = null
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var editButton: ImageButton
@@ -136,6 +138,7 @@ class PetProfileHomeFragment : Fragment() {
                     }
                     val updatedPet = Pet(
                         name = inputValues[0],   // Pet's name
+                        image = petImage,        // Pet's image
                         breed = inputValues[1],  // Pet's breed
                         sex = inputValues[2],    // Pet's sex
                         birthday = inputValues[3], // Pet's birthday
@@ -200,6 +203,7 @@ class PetProfileHomeFragment : Fragment() {
                 if (pet != null) {
                     // Update pet details
                     petName = pet.name
+                    petImage = pet.image
                     petBreed = pet.breed
                     petSex = pet.sex
                     petBirthday = pet.birthday

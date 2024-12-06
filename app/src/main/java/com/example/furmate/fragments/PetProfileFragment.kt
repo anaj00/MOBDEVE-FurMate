@@ -113,7 +113,7 @@ class PetProfileFragment : Fragment() {
                     }
                     1 ->{
                         if (petID.isNullOrEmpty()) {
-                            Log.e("FormAddBookFragment", "petID is null or empty. Defaulting to 'unknown'")
+                            Log.e("FormAddBookFragment", "Pet ID is null or empty")
                         } else {
                             Log.d("FormAddBookFragment", "Passing petID: $petID to PetBookFragment")
                         }
