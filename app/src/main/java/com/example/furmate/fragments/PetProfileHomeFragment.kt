@@ -225,9 +225,6 @@ class PetProfileHomeFragment : Fragment() {
 
                     // Notify the adapter to refresh the data
                     adapter.notifyDataSetChanged()
-
-                    // Update toolbar title with pet's name
-                    (requireActivity() as? HomeActivity)?.changeToolbarTitle("$petName's Records")
                 }
             }
         }
