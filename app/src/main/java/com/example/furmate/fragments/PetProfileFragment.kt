@@ -13,7 +13,7 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.example.furmate.HomeActivity
 import com.example.furmate.PetProfileHomeFragment
-import com.example.furmate.PetBookFragment
+import com.example.furmate.PetRecordFragment
 import com.example.furmate.PetScheduleFragment
 import com.example.furmate.R
 import com.example.furmate.db.PetRepositoryAPI
@@ -109,7 +109,7 @@ class PetProfileFragment : Fragment() {
                         } else {
                             Log.d("FormAddBookFragment", "Passing petID: $petID to PetBookFragment")
                         }
-                        PetBookFragment.newInstance(petID ?: "unknown")
+                        PetRecordFragment.newInstance(petID ?: "unknown")
                     }
                     2 -> PetScheduleFragment.newInstance(petName = petNameTextView.text.toString())
                     else -> throw IllegalArgumentException("Invalid position")

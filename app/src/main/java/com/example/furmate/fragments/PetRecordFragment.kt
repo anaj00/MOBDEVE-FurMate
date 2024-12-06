@@ -13,18 +13,18 @@ import com.example.furmate.fragments.FormScheduleFragment
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 
-class PetBookRecordFragment : Fragment() {
+class PetRecordFragment : Fragment() {
     private lateinit var bookRepositoryAPI: BookRepositoryAPI
 
     companion object {
         private const val ARG_BOOK_ID = "book_id"
 
-        fun newInstance(bookID: String): PetBookRecordFragment {
-            val fragment = PetBookRecordFragment()
+        fun newInstance(bookID: String): PetRecordFragment {
+            val fragment = PetRecordFragment()
             val args = Bundle()
             args.putString(ARG_BOOK_ID, bookID)
             fragment.arguments = args
-            return PetBookRecordFragment()
+            return PetRecordFragment()
         }
     }
 
@@ -35,8 +35,6 @@ class PetBookRecordFragment : Fragment() {
         val rootView = inflater.inflate(R.layout.screen_pets, container, false)
         val gridLayout = rootView.findViewById<GridLayout>(R.id.grid_layout_pets)
         gridLayout.columnCount = 2
-
-        // Replace backend call with dummy data
 
         // Initialize firestore
         val firestore = FirebaseFirestore.getInstance()
