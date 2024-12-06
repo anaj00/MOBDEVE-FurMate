@@ -92,13 +92,27 @@ class ComposableInputAdapter(
                 toggleInput(holder.inputText, inputState[position] ?: true)
 
                 // Handle specific input types like DatePicker for "Birthday" and "Date"
-                if (hint == "Birthday" || hint == "Date") {
-                    holder.inputText.inputType = android.text.InputType.TYPE_NULL
-                    holder.inputText.setOnClickListener {
-                        showDatePicker(holder.inputText)
+                when (hint) {
+                    "Birthday", "Date" -> {
+                        holder.inputText.inputType = android.text.InputType.TYPE_NULL
+                        holder.inputText.setOnClickListener {
+                            showDatePicker(holder.inputText)
+                        }
                     }
-                } else {
-                    holder.inputText.inputType = android.text.InputType.TYPE_CLASS_TEXT
+                    "File", "Image", "Profile Picture" -> {
+                        holder.inputLayout.endIconMode = TextInputLayout.END_ICON_CUSTOM
+                        holder.inputLayout.setEndIconDrawable(android.R.drawable.ic_menu_gallery)
+
+                        // Handle click on the end icon
+                        holder.inputLayout.setEndIconOnClickListener {
+                            openFileChooser(holder.inputText)
+                        }
+                    }
+                    else -> {
+                        // Default behavior for other fields (like "Name")
+                        holder.inputText.inputType = android.text.InputType.TYPE_CLASS_TEXT // Ensure it's set as text
+                        holder.inputText.isEnabled = true  // Ensure the field is enabled
+                    }
                 }
             }
             is DropdownViewHolder -> {

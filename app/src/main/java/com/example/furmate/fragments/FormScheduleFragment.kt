@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.Spinner
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -135,7 +136,7 @@ class FormScheduleFragment() : Fragment() {
         val composableInputs = if (isSchedule!!) {
             listOf("Title", "Date", "Pet", "Notes")
         } else {
-            listOf("Title", "Pet", "Book", "Notes", "Image")
+            listOf("Title", "Pet", "Book", "Image", "Notes")
         }
 
         // Pre-fill the fields if task data exists
@@ -171,20 +172,28 @@ class FormScheduleFragment() : Fragment() {
                 val holder = recyclerView.getChildViewHolder(child)
                 val hint = holder.itemView.findViewById<TextInputLayout>(R.id.enter_hint_div).hint.toString()
                 val key = hintToFieldMap[hint] ?: hint.lowercase(Locale.getDefault())
-                val value = holder.itemView.findViewById<TextInputEditText>(R.id.input_field).text.toString()
 
-                Log.d("FormScheduleFragment", "Hint: $hint, FieldName: $key, Value: $value")
+                // Safely access the TextInputEditText and check for null
+                val inputField = holder.itemView.findViewById<TextInputEditText>(R.id.input_field)
 
-                if (key.isNotEmpty() && value.isNotEmpty()) {
-                    taskData[key] = if (key == "date") {
-                        // Ensure the date is always in a consistent format
-                        val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                        val parsedDate = inputFormat.parse(value)
-                        val outputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                        parsedDate?.let { outputFormat.format(it) } ?: value
-                    } else {
-                        value
+                // Only proceed if the input field is not null
+                if (inputField != null) {
+                    val value = inputField.text.toString()
+                    Log.d("FormScheduleFragment", "Hint: $hint, FieldName: $key, Value: $value")
+
+                    if (key.isNotEmpty() && value.isNotEmpty()) {
+                        taskData[key] = if (key == "date") {
+                            // Ensure the date is always in a consistent format
+                            val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                            val parsedDate = inputFormat.parse(value)
+                            val outputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                            parsedDate?.let { outputFormat.format(it) } ?: value
+                        } else {
+                            value
+                        }
                     }
+                } else {
+                    Log.e("FormScheduleFragment", "TextInputEditText is null for field: $key")
                 }
             }
 
@@ -217,7 +226,7 @@ class FormScheduleFragment() : Fragment() {
                     taskRepositoryAPI.addTask(task)
                 } else {
                     // Add the record to the Firestore database
-                    var imageBlob: Blob? = null;
+                    var imageBlob: Blob? = null
                     taskData["image"]?.let {
                         imageBlob = uriToBlob(Uri.parse(it), requireContext())
                     }
@@ -234,8 +243,9 @@ class FormScheduleFragment() : Fragment() {
                     Log.d("FormScheduleFragment", "Record submitted")
                 }
             }
+
             // Test for differentiating the return value
-//            Log.d("FormScheduleFragment", "onCreateView: $taskData")
+            // Log.d("FormScheduleFragment", "onCreateView: $taskData")
             (requireActivity() as? HomeActivity)?.showFABs()
             requireActivity().onBackPressedDispatcher.onBackPressed()
         }
@@ -250,12 +260,25 @@ class FormScheduleFragment() : Fragment() {
 
         for (child in recyclerView.children) {
             val holder = recyclerView.getChildViewHolder(child)
-            val key = holder.itemView.findViewById<TextInputLayout>(R.id.enter_hint_div).hint.toString()
-            val value = holder.itemView.findViewById<TextInputEditText>(R.id.input_field).text.toString()
+            val hint = holder.itemView.findViewById<TextInputLayout>(R.id.enter_hint_div).hint.toString()
 
-            outState.putString(key, value)
+            // Check if the input is a TextInputEditText or a dropdown
+            val textField = holder.itemView.findViewById<TextInputEditText>(R.id.input_field)
+            val spinner = holder.itemView.findViewById<Spinner>(R.id.input_field_spinner) // Assuming this is the dropdown
+
+            // For TextInputEditText
+            if (textField != null) {
+                val value = textField.text.toString()
+                outState.putString(hint, value)
+            }
+            // For Spinner (dropdown)
+            else if (spinner != null) {
+                val selectedItem = spinner.selectedItem?.toString() ?: ""
+                outState.putString(hint, selectedItem)
+            }
         }
     }
+
 
     companion object {
         // Function to create a new instance with pre-filled data
