@@ -9,25 +9,31 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.gridlayout.widget.GridLayout
 import com.example.furmate.db.BookRepositoryAPI
+import com.example.furmate.db.RecordRepositoryAPI
 import com.example.furmate.fragments.FormScheduleFragment
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlin.math.log
 
 class PetRecordFragment : Fragment() {
-    private lateinit var bookRepositoryAPI: BookRepositoryAPI
+    private lateinit var recordRepositoryAPI: RecordRepositoryAPI
 
     companion object {
-        private const val ARG_BOOK_ID = "book_id"
+        private const val ARG_PET_ID = "pet_id"
 
-        fun newInstance(bookID: String): PetRecordFragment {
+        fun newInstance(petID: String): PetRecordFragment {
             val fragment = PetRecordFragment()
             val args = Bundle()
-            args.putString(ARG_BOOK_ID, bookID)
+            args.putString(ARG_PET_ID, petID)
             fragment.arguments = args
-            return PetRecordFragment()
+            Log.d("PetRecordFragment", "${args} in pet record fragment")
+            return fragment
         }
     }
-
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        Log.d("PetRecordFragment", "Activity created, arguments: ${arguments}")
+    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -38,18 +44,18 @@ class PetRecordFragment : Fragment() {
 
         // Initialize firestore
         val firestore = FirebaseFirestore.getInstance()
-        val bookCollection = firestore.collection("Books")
         val recordCollection = firestore.collection("Record")
-        bookRepositoryAPI = BookRepositoryAPI(bookCollection)
+        recordRepositoryAPI = RecordRepositoryAPI(recordCollection)
 
-
-        getAllRecords(arguments?.getString(ARG_BOOK_ID) ?: "Unknown", recordCollection) { records, error ->
+        Log.d("PetRecordFragment", "arguments:  ${arguments?.keySet()}")
+        val petID = arguments?.getString(ARG_PET_ID) ?: ""
+        getAllRecords(petID) { records, error ->
             if (error != null) {
                 // Handle error
-                Log.e("PetBookRecordFragment", "Error fetching records: $error")
+                Log.e("PetRecordFragment", "Error fetching records: $error")
                 return@getAllRecords
             }
-
+            Log.d("PetRecordFragment", "kansamita")
             // Add record items to the GridLayout
             records?.let { recordList ->
                 for (record in recordList) {
@@ -107,13 +113,9 @@ class PetRecordFragment : Fragment() {
         )
         (requireActivity() as FragmentNavigator).navigateToFragment(fragment)
     }
-    private fun getAllRecords(bookID: String, collection: CollectionReference,callback: (records: List<com.example.furmate.models.Record>?, error: Exception?) -> Unit) {
-        bookRepositoryAPI.getAllRecords(bookID, collection) { records, error ->
-            if (error != null) {
-                callback(null, error) // Pass the error to the callback
-            } else {
-                callback(records, null) // Pass the fetched
-            }
+    private fun getAllRecords(petID: String, callback: (records: List<com.example.furmate.models.Record>?, error: Exception?) -> Unit) {
+        recordRepositoryAPI.getAllRecordsByPetID(petID) { records, error ->
+            callback(records, error)
         }
     }
 }
