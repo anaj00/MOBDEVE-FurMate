@@ -12,10 +12,10 @@ class TaskRepositoryAPI (private val collection: CollectionReference) {
         Log.d("TaskRepositoryAPI", "Attempting to add task to Firestore")
         val document = collection.document()
         val taskWithId = task.copy(id = document.id)
-        collection
-            .add(taskWithId)
-            .addOnSuccessListener { documentReference ->
-                Log.d("FireStore,", "Task added with ID: ${documentReference.id}")
+        document
+            .set(taskWithId)
+            .addOnSuccessListener {
+                Log.d("FireStore,", "Task added with ID: ${document.id}")
 
             }
             .addOnFailureListener { e ->

@@ -204,13 +204,15 @@ class FormScheduleFragment() : Fragment() {
                 }
             } else {
                 Log.d("FormScheduleFragment","isSchedule: $isSchedule")
+                val userID = Firebase.auth.currentUser?.uid ?: ""
                 if (isSchedule!!) {
                     // Add the task to the Firestore database
                     val task = Task(
                         name = taskData["name"] ?: "",
                         date = taskData["date"] ?: "1970-01-01", // Default date value
                         petName = taskData["petName"] ?: "",
-                        notes = taskData["notes"]
+                        notes = taskData["notes"],
+                        userID = userID,
                     )
                     taskRepositoryAPI.addTask(task)
                 } else {
@@ -219,7 +221,6 @@ class FormScheduleFragment() : Fragment() {
                     taskData["image"]?.let {
                         imageBlob = uriToBlob(Uri.parse(it), requireContext())
                     }
-                    val userID = Firebase.auth.currentUser?.uid ?: ""
                     val record = Record(
                         name = taskData["name"] ?: "",
                         petName = taskData["petName"] ?: "",
