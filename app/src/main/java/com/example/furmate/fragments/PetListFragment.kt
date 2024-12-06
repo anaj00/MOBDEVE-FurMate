@@ -1,8 +1,11 @@
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
@@ -14,6 +17,8 @@ import com.example.furmate.fragments.FormAddPetFragment
 import com.example.furmate.fragments.PetProfileFragment
 import com.google.firebase.firestore.FirebaseFirestore
 import com.example.furmate.models.Pet
+import com.example.furmate.utils.ImageLoader
+import com.squareup.picasso.Picasso
 
 class PetsFragment : Fragment() {
     private lateinit var petRepositoryAPI: PetRepositoryAPI
@@ -42,6 +47,7 @@ class PetsFragment : Fragment() {
 
         // Get all pets from the database
         // Set up the list of pets
+
         getAllPets { pets, error ->
             if (error != null) {
                 Log.e("PetsFragment", "Error fetching pets: $error")
@@ -61,6 +67,7 @@ class PetsFragment : Fragment() {
             }
 
             gridLayout.addView(petAdd)
+
             // Dynamically add pet items to GridLayout
             pets?.let { petList ->
                 for (pet in petList) {
@@ -69,6 +76,12 @@ class PetsFragment : Fragment() {
                     // Set the pet name
                     val petNameView = petItemView.findViewById<TextView>(R.id.pet_name)
                     petNameView.text = pet.name
+
+                    // Set the pet image
+                    pet.image?.let {
+                        val petImageView = petItemView.findViewById<ImageView>(R.id.pet_icon)
+                        petImageView.setImageBitmap(ImageLoader.fromBlobScaled(pet.image, 150, 150))
+                    }
 
                     // Measure the width of the card to set the height equal to the width (for a square appearance)
                     petItemView.post {
