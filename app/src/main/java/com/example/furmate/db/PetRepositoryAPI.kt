@@ -37,7 +37,8 @@ class PetRepositoryAPI (private val collection: CollectionReference) {
                         birthday = document.getString("birthday") ?: "",
                         weight = document.getString("weight") ?: "",
                         notes = document.getString("notes"),
-                        userID = document.getString("userID") ?: ""
+                        userID = document.getString("userID") ?: "",
+                        image = document.getBlob("image")
                     )
                 }
                 callback(pets, null)
@@ -62,7 +63,8 @@ class PetRepositoryAPI (private val collection: CollectionReference) {
                         birthday = it.getString("birthday") ?: "Unkown",
                         weight = it.getString("weight") ?: "Unknown",
                         notes = it.getString("notes"),
-                        userID = it.getString("userID") ?: "Unknown"
+                        userID = it.getString("userID") ?: "Unknown",
+                        image = document.getBlob("image")
                     )
                 }
                 callback(pet, null)
