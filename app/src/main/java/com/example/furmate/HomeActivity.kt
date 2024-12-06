@@ -256,7 +256,7 @@ class HomeActivity : AppCompatActivity(), FragmentNavigator {
         super.onBackPressed()
     }
 
-    private fun showFABs() {
+    fun showFABs() {
         mainFAB.visibility = View.VISIBLE
         scheduleFAB.visibility = View.GONE // Keep these hidden until the main FAB is clicked again
         recordFAB.visibility = View.GONE

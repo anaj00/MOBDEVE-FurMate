@@ -14,6 +14,7 @@ import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.furmate.HomeActivity
 import com.example.furmate.R
 import com.example.furmate.adapter.ComposableInputAdapter
 import com.example.furmate.db.RecordRepositoryAPI
@@ -234,8 +235,11 @@ class FormScheduleFragment() : Fragment() {
             }
             // Test for differentiating the return value
 //            Log.d("FormScheduleFragment", "onCreateView: $taskData")
+            (requireActivity() as? HomeActivity)?.showFABs()
             requireActivity().onBackPressedDispatcher.onBackPressed()
         }
+
+
 
         return rootView
     }
