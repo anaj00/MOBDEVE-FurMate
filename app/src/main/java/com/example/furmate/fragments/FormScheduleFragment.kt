@@ -51,6 +51,7 @@ class FormScheduleFragment() : Fragment() {
     private var taskPet: String? = null
     private var taskNotes: String? = null
     private var isEditMode: Boolean = false
+    private var taskURI: String? = null
     private var documentId: String? = null
 
     private lateinit var submitButton: Button
@@ -101,6 +102,7 @@ class FormScheduleFragment() : Fragment() {
             taskWhere = it.getString("task_where")
             taskPet = it.getString("task_pet")
             taskNotes = it.getString("task_notes")
+            taskURI = it.getString("task_image")
             documentId = it.getString("document_id")
         }
 
@@ -174,16 +176,15 @@ class FormScheduleFragment() : Fragment() {
         } else {
             formEntries.add(taskTitle ?: "")
             formEntries.add(taskPet ?: "")
+            formEntries.add(taskURI?: "")
             formEntries.add(taskNotes ?: "")
         }
 
         if (formEntries.any { it.isNotEmpty() }) {
             header.visibility = View.GONE
         }
-        Log.d("FormScheduleFragment", "Form Entries: $formEntries"
-        )
         val adapter = ComposableInputAdapter(composableInputs, formEntries, requireContext(), filePickerLauncher)
-        Log.d("FormScheduleFragment", "composableInputs: $composableInputs")
+
         recyclerView.adapter = adapter
 
         submitButton = rootView.findViewById(R.id.submit_btn);
@@ -240,14 +241,27 @@ class FormScheduleFragment() : Fragment() {
 
                 if (isEditMode) {
                     // Update existing document
-                    Log.d("FormScheduleFragment", "before api call")
-                    val updatedTask = taskData.mapValues { it.value as Any }
-                    documentId?.let { id ->
-                        taskRepositoryAPI.updateTask(id, updatedTask) { success, exception ->
-                            if (success) {
-                                Log.d("FormScheduleFragment", "Task successfully updated")
-                            } else {
-                                Log.e("FormScheduleFragment", "Error updating task", exception)
+                    if (isSchedule!!){
+                        Log.d("FormScheduleFragment", "before api call")
+                        val updatedTask = taskData.mapValues { it.value as Any }
+                        documentId?.let { id ->
+                            taskRepositoryAPI.updateTask(id, updatedTask) { success, exception ->
+                                if (success) {
+                                    Log.d("FormScheduleFragment", "Task successfully updated")
+                                } else {
+                                    Log.e("FormScheduleFragment", "Error updating task", exception)
+                                }
+                            }
+                        }
+                    } else {
+                        val updatedRecord = taskData.mapValues { it.value as Any }
+                        documentId?.let { id ->
+                            recordRepositoryAPI.updateRecord(id, updatedRecord) { success, exception ->
+                                if (success) {
+                                    Log.d("FormScheduleFragment", "Record successfully updated")
+                                } else {
+                                    Log.e("FormScheduleFragment", "Error updating record", exception)
+                                }
                             }
                         }
                     }
@@ -377,7 +391,7 @@ class FormScheduleFragment() : Fragment() {
         // Function to create a new instance with pre-filled data
         fun newInstance(
             isSchedule: Boolean, title: String?, date: String?, where: String?,
-            pet: String?, notes: String?, documentId: String? = null
+            pet: String?, notes: String?, documentId: String? = null, taskImage: String? = null
         ): FormScheduleFragment {
             val fragment = FormScheduleFragment()
             val args = Bundle()
@@ -387,6 +401,7 @@ class FormScheduleFragment() : Fragment() {
             args.putString("task_where", where)
             args.putString("task_pet", pet)
             args.putString("task_notes", notes)
+            args.putString("task_image", taskImage)
             args.putString("document_id", documentId)
             fragment.arguments = args
             return fragment

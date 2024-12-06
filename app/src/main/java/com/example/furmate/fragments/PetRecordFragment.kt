@@ -55,7 +55,7 @@ class PetRecordFragment : Fragment() {
                 Log.e("PetRecordFragment", "Error fetching records: $error")
                 return@getAllRecords
             }
-            Log.d("PetRecordFragment", "kansamita")
+
             // Add record items to the GridLayout
             records?.let { recordList ->
                 for (record in recordList) {
@@ -75,7 +75,7 @@ class PetRecordFragment : Fragment() {
                     }
 
                     recordItemView.setOnClickListener {
-                        openRecordProfile()
+                        openRecordProfile(record)
                     }
 
                     // Add the record item to the GridLayout
@@ -88,30 +88,24 @@ class PetRecordFragment : Fragment() {
         return rootView
     }
 
-    private fun openRecordProfile() {
+    private fun openRecordProfile(record: com.example.furmate.models.Record) {
         // Pass required arguments to the FormScheduleFragment
-        val fragment = FormScheduleFragment.newInstance(
+        (activity as? HomeActivity)?.hideFABs()
+        val fragment = FormScheduleFragment.Companion.newInstance(
             isSchedule = false,
-            title = null,
+            title = record.name,
             date = null,
             where = null,
-            pet = null,
-            notes = null
+            pet = record.petName,
+            taskImage = record.imageURI,
+            notes = record.notes,
+            documentId = record.id,
         )
-        (requireActivity() as FragmentNavigator).navigateToFragment(fragment)
-    }
-
-    private fun openAddRecordForm() {
-        // Pass required arguments to the FormScheduleFragment
-        val fragment = FormScheduleFragment.newInstance(
-            isSchedule = false,
-            title = null,
-            date = null,
-            where = null,
-            pet = null,
-            notes = null
-        )
-        (requireActivity() as FragmentNavigator).navigateToFragment(fragment)
+        (activity as? HomeActivity)?.supportFragmentManager?.beginTransaction()
+            ?.setReorderingAllowed(true)
+            ?.replace(R.id.fragment_container, fragment)
+            ?.addToBackStack(HomeActivity.Companion.FragmentName.HOME.name)
+            ?.commit()
     }
     private fun getAllRecords(petID: String, callback: (records: List<com.example.furmate.models.Record>?, error: Exception?) -> Unit) {
         recordRepositoryAPI.getAllRecordsByPetID(petID) { records, error ->

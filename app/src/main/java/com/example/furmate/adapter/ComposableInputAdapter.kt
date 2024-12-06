@@ -99,90 +99,97 @@ class ComposableInputAdapter(
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        val hint = hints[position]
-        val prefilledValue = prefilledValues[position]
 
-        // Set the hint text and populate the input field
-        when (holder) {
-            is TextInputViewHolder -> {
-                holder.inputLayout.hint = hint
-                if (prefilledValue.isNotEmpty()) {
-                    holder.inputText.setText(prefilledValue)
+        if (position < hints.size && position < prefilledValues.size) {
+            val hint = hints[position]
+            val prefilledValue = prefilledValues[position]
+
+            // Bind data to the ViewHolder
+            // Example: holder.bind(hint, prefilledValue)
+            when (holder) {
+                is TextInputViewHolder -> {
+                    holder.inputLayout.hint = hint
+                    if (prefilledValue.isNotEmpty()) {
+                        holder.inputText.setText(prefilledValue)
+                    }
+                    toggleInput(holder.inputText, inputState[position] ?: true)
+
+                    // Handle specific input types like DatePicker for "Birthday" and "Date"
+                    when (hint) {
+                        "Birthday", "Date" -> {
+                            holder.inputText.inputType = android.text.InputType.TYPE_NULL
+                            holder.inputText.setOnClickListener {
+                                showDatePicker(holder.inputText)
+                            }
+                        }
+                        "File", "Image", "Profile Picture" -> {
+                            holder.inputLayout.endIconMode = TextInputLayout.END_ICON_CUSTOM
+                            holder.inputLayout.setEndIconDrawable(android.R.drawable.ic_menu_gallery)
+
+                            // Handle click on the end icon
+                            holder.inputLayout.setEndIconOnClickListener {
+                                openFileChooser(holder.inputText)
+                            }
+                        }
+                        else -> {
+                            // Default behavior for other fields (like "Name")
+                            holder.inputText.inputType = android.text.InputType.TYPE_CLASS_TEXT // Ensure it's set as text
+                            holder.inputText.isEnabled = true  // Ensure the field is enabled
+                        }
+                    }
                 }
-                toggleInput(holder.inputText, inputState[position] ?: true)
+                is DropdownViewHolder -> {
+                    holder.inputLayout.hint = hint
 
-                // Handle specific input types like DatePicker for "Birthday" and "Date"
-                when (hint) {
-                    "Birthday", "Date" -> {
-                        holder.inputText.inputType = android.text.InputType.TYPE_NULL
-                        holder.inputText.setOnClickListener {
-                            showDatePicker(holder.inputText)
-                        }
+                    // Define different sets of options based on the field (hint)
+                    val options: List<String> = when (hint) {
+                        "Pet" -> petOptions.map { it.first} // Use the pet options
+                        else -> listOf("Option 1", "Option 2", "Option 3") // Default options
                     }
-                    "File", "Image", "Profile Picture" -> {
-                        holder.inputLayout.endIconMode = TextInputLayout.END_ICON_CUSTOM
-                        holder.inputLayout.setEndIconDrawable(android.R.drawable.ic_menu_gallery)
 
-                        // Handle click on the end icon
-                        holder.inputLayout.setEndIconOnClickListener {
-                            openFileChooser(holder.inputText)
-                        }
+                    // Set up the spinner with the appropriate options
+                    val spinnerAdapter = ArrayAdapter<String>(
+                        context,
+                        android.R.layout.simple_spinner_item,
+                        options
+                    )
+
+                    spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                    holder.spinner.adapter = spinnerAdapter
+
+                    // Set previously selected value, if any
+                    // If the prefilled value doesn't match any of the options, select the first option.
+                    val selectedPosition = spinnerAdapter.getPosition(prefilledValue)
+                    if (selectedPosition >= 0) {
+                        holder.spinner.setSelection(selectedPosition)
+                    } else {
+                        // Set a default selection if prefilledValue is empty or invalid
+                        holder.spinner.setSelection(0) // Select the first option by default
                     }
-                    else -> {
-                        // Default behavior for other fields (like "Name")
-                        holder.inputText.inputType = android.text.InputType.TYPE_CLASS_TEXT // Ensure it's set as text
-                        holder.inputText.isEnabled = true  // Ensure the field is enabled
+
+                    toggleInput(holder.spinner, inputState[position] ?: true)
+                    holder.spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                        override fun onItemSelected(parent: AdapterView<*>, view: View?, selectedPosition: Int, id: Long) {
+                            // Get the selected pet from petOptions (Pair of petName and petID)
+                            val selectedPet = petOptions.getOrNull(selectedPosition) // Get the Pair based on selected position
+                            val selectedPetID = selectedPet?.second // petID (second part of the Pair)
+
+                            Log.d("ComposableInputAdapter", "Selected Pet ID: $selectedPetID")
+                            selectedPetID?.let {
+                                formScheduleViewModel.setSelectedPetID(it)  // Update ViewModel with selected petID
+                            }
+                        }
+
+                        override fun onNothingSelected(parent: AdapterView<*>) {
+                            // No action needed when nothing is selected
+                        }
                     }
                 }
             }
-            is DropdownViewHolder -> {
-                holder.inputLayout.hint = hint
-
-                // Define different sets of options based on the field (hint)
-                val options: List<String> = when (hint) {
-                    "Pet" -> petOptions.map { it.first} // Use the pet options
-                    else -> listOf("Option 1", "Option 2", "Option 3") // Default options
-                }
-
-                // Set up the spinner with the appropriate options
-                val spinnerAdapter = ArrayAdapter<String>(
-                    context,
-                    android.R.layout.simple_spinner_item,
-                    options
-                )
-
-                spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                holder.spinner.adapter = spinnerAdapter
-
-                // Set previously selected value, if any
-                // If the prefilled value doesn't match any of the options, select the first option.
-                val selectedPosition = spinnerAdapter.getPosition(prefilledValue)
-                if (selectedPosition >= 0) {
-                    holder.spinner.setSelection(selectedPosition)
-                } else {
-                    // Set a default selection if prefilledValue is empty or invalid
-                    holder.spinner.setSelection(0) // Select the first option by default
-                }
-
-                toggleInput(holder.spinner, inputState[position] ?: true)
-                holder.spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                    override fun onItemSelected(parent: AdapterView<*>, view: View?, selectedPosition: Int, id: Long) {
-                        // Get the selected pet from petOptions (Pair of petName and petID)
-                        val selectedPet = petOptions.getOrNull(selectedPosition) // Get the Pair based on selected position
-                        val selectedPetID = selectedPet?.second // petID (second part of the Pair)
-
-                        Log.d("ComposableInputAdapter", "Selected Pet ID: $selectedPetID")
-                        selectedPetID?.let {
-                            formScheduleViewModel.setSelectedPetID(it)  // Update ViewModel with selected petID
-                        }
-                    }
-
-                    override fun onNothingSelected(parent: AdapterView<*>) {
-                        // No action needed when nothing is selected
-                    }
-                }
-            }
+        } else {
+            Log.e("ComposableInputAdapter", "Position $position is out of bounds. Hints size: ${hints.size}, PrefilledValues size: ${prefilledValues.size}")
         }
+        // Set the hint text and populate the input field
     }
 
     private fun openFileChooser(inputField: TextInputEditText) {
