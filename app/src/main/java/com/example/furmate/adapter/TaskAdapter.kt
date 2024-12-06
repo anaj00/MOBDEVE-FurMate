@@ -34,7 +34,7 @@ class TaskAdapter(
 
         // Set task data here
         holder.itemView.findViewById<TextView>(R.id.task_title).text = task.name
-        holder.itemView.findViewById<TextView>(R.id.task_time).text = task.date
+        holder.itemView.findViewById<TextView>(R.id.task_time).text = task.petName + " | " + task.date
 
         // set pet image
         Log.d("TaskAdapter", task.toString())

@@ -51,7 +51,21 @@ class ComposableInputAdapter(
     class DropdownViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val inputLayout: TextInputLayout = itemView.findViewById(R.id.enter_hint_div)
         val spinner: Spinner = itemView.findViewById(R.id.input_field_spinner)
+
+        init {
+            spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parentView: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    // Log the selected item from the dropdown
+                    Log.d("ComposableInputAdapter", "Selected Item: ${parentView?.getItemAtPosition(position)}")
+                }
+
+                override fun onNothingSelected(parentView: AdapterView<*>?) {
+                    Log.d("ComposableInputAdapter", "No item selected")
+                }
+            }
+        }
     }
+
 
     init {
         // Initialize all inputs as enabled by default

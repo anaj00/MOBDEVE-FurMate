@@ -62,6 +62,10 @@ dependencies {
     implementation(libs.firebase.ui.firestore)
     implementation(libs.google.firebase.auth)
 
+    // Coroutines
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.0")
+
+
     // MDC (Material Design Components)
     implementation("com.google.android.material:material:1.9.0")
 

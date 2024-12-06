@@ -48,6 +48,7 @@ class HomeFragment : Fragment() {
         scheduleCollection = firestore.collection("Schedule")
         recordCollection = firestore.collection("Record")
         userID = Firebase.auth.currentUser?.uid ?: ""
+
         // Set up RecyclerView for "Today" pane
         val todayRecyclerView = rootView.findViewById<RecyclerView>(R.id.today_recycler_view)
         todayTasks = ArrayList()

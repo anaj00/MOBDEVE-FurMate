@@ -5,6 +5,9 @@ import com.example.furmate.models.Pet
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.CollectionReference
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 class PetRepositoryAPI (private val collection: CollectionReference) {
     // Add pet to database
@@ -49,19 +52,20 @@ class PetRepositoryAPI (private val collection: CollectionReference) {
             }
     }
 
-    fun getPetIDByName(collection: CollectionReference, petName: String, callback: (String?, Exception?) -> Unit) {
-        collection
-            .whereEqualTo("name", petName)
-            .get()
-            .addOnSuccessListener { result ->
-                val document = result.documents.firstOrNull()
-
-            callback(document?.id, null)
-            }
-            .addOnFailureListener() { e ->
-                callback(null, e)
-            }
+    // Modify the method in PetRepositoryAPI
+    suspend fun getPetIDByName(petCollection: CollectionReference, petName: String): String? {
+        return suspendCoroutine { continuation ->
+            petCollection.whereEqualTo("name", petName).get()
+                .addOnSuccessListener { querySnapshot ->
+                    val petID = querySnapshot.documents.firstOrNull()?.id
+                    continuation.resume(petID)
+                }
+                .addOnFailureListener { exception ->
+                    continuation.resumeWithException(exception)
+                }
+        }
     }
+
 
 
     fun getPetByID(collection: CollectionReference, petId: String, callback: (Pet?, Exception?) -> Unit) {
