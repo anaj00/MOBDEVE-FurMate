@@ -10,4 +10,12 @@ data class Task(
     var petName: String = "",
     var notes: String? = null,
     var userID: String? = null,
-)
+) {
+    constructor() : this(
+        id = null,
+        name ="",
+        date = "",
+        petName = "",
+        notes = "",
+        userID = "")
+}

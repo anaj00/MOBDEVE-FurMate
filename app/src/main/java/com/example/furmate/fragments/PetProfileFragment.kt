@@ -119,7 +119,7 @@ class PetProfileFragment : Fragment() {
                         }
                         PetRecordFragment.newInstance(petID ?: "unknown")
                     }
-                    2 -> PetScheduleFragment.newInstance(petName = petNameTextView.text.toString())
+                    2 -> PetScheduleFragment.newInstance(petID ?: "unknown")
                     else -> throw IllegalArgumentException("Invalid position")
                 }
             }

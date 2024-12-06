@@ -27,24 +27,18 @@ class PetScheduleFragment : Fragment() {
     private lateinit var scheduleCollection: CollectionReference
     private lateinit var taskRepositoryAPI: TaskRepositoryAPI
     private var snapshotListenerRegistration: ListenerRegistration? = null
-    private var petName: String? = null
-
+    private val petID: String? get() = arguments?.getString(ARG_PET_ID)
     companion object {
-        fun newInstance(petName: String): PetScheduleFragment {
+        private const val ARG_PET_ID = "pet_id"
+        fun newInstance(petID: String): PetScheduleFragment {
             val fragment = PetScheduleFragment()
             val args = Bundle()
-            args.putString("petName", petName) // Pass petName in the Bundle
+            args.putString(ARG_PET_ID, petID) // Pass petName in the Bundle
             fragment.arguments = args
             return fragment
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            petName = it.getString("petName")
-        }
-    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -82,7 +76,7 @@ class PetScheduleFragment : Fragment() {
         val initialDate = Date()
         dateHeader.text = getFormattedDate(initialDate)
 
-        observeTasksByDateAndPet(initialDate, petName ?: "")
+        observeTasksByDateAndPet(initialDate, petID ?: "")
 
         // Set up the MaterialDatePicker
         val datePicker = MaterialDatePicker.Builder.datePicker()
@@ -98,7 +92,7 @@ class PetScheduleFragment : Fragment() {
         datePicker.addOnPositiveButtonClickListener { selection ->
             val date = Date(selection)
             dateHeader.text = getFormattedDate(date)
-            observeTasksByDateAndPet(date, petName ?: "")
+            observeTasksByDateAndPet(date, petID ?: "")
         }
 
         return rootView
@@ -110,19 +104,16 @@ class PetScheduleFragment : Fragment() {
         return dateFormat.format(date)
     }
 
-    private fun observeTasksByDateAndPet(date: Date, petName: String) {
-        Log.d("PetScheduleFragment", "PetName: $petName")
+    private fun observeTasksByDateAndPet(date: Date, petID: String) {
+        Log.d("PetScheduleFragment", "PetName: $petID")
         val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
         val formattedDate = dateFormat.format(date)
-        val startOfDay = "$formattedDate 00:00"
-        val endOfDay = "$formattedDate 23:59"
 
         snapshotListenerRegistration?.remove()
 
         snapshotListenerRegistration = scheduleCollection
-            .whereGreaterThanOrEqualTo("date", startOfDay)
-            .whereLessThanOrEqualTo("date", endOfDay)
-            .whereEqualTo("petName", petName) // Filter by pet name
+            .whereEqualTo("date", formattedDate) // Filter by date
+            .whereEqualTo("petName", petID) // Filter by pet name
             .addSnapshotListener { snapshots, error ->
                 if (error != null) {
                     Log.e("PetScheduleFragment", "Error listening for tasks", error)
