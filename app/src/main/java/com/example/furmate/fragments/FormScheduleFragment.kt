@@ -133,7 +133,7 @@ class FormScheduleFragment() : Fragment() {
         }
 
         val composableInputs = if (isSchedule!!) {
-            listOf("Title", "Date", "Pet", "Notes")
+            listOf("Title", "Date", "Pet", "Notes", "Image")
         } else {
             listOf("Title", "Pet", "Notes", "Image")
         }
