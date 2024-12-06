@@ -70,8 +70,9 @@ class ComposableInputAdapter(
         // Apply the enabled/disabled state to the input field
         toggleInput(holder, inputState[position] ?: true)
 
+        // Handle specific input types based on the hint
         when (hint) {
-            "Date", "Birthday" -> {
+            "Birthday", "Date" -> {
                 holder.inputText.inputType = android.text.InputType.TYPE_NULL
                 holder.inputText.setOnClickListener {
                     showDatePicker(holder.inputText)
@@ -81,17 +82,18 @@ class ComposableInputAdapter(
                 holder.inputLayout.endIconMode = TextInputLayout.END_ICON_CUSTOM
                 holder.inputLayout.setEndIconDrawable(android.R.drawable.ic_menu_gallery)
 
-
                 // Handle click on the end icon
                 holder.inputLayout.setEndIconOnClickListener {
                     openFileChooser(holder.inputText)
                 }
             }
             else -> {
-                // Default behavior for other hints
+                // Default behavior for other fields (like "Name")
+                holder.inputText.inputType = android.text.InputType.TYPE_CLASS_TEXT // Ensure it's set as text
                 holder.inputText.isEnabled = true  // Ensure the field is enabled
             }
         }
+
         Log.d("ComposableInputAdapter", "onBindViewHolder: $hint")
     }
 
