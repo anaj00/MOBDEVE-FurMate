@@ -13,6 +13,8 @@ import com.example.furmate.R
 import com.example.furmate.models.Task
 import com.example.furmate.adapter.TaskAdapter
 import com.example.furmate.utils.MarginItemDecoration
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
@@ -33,7 +35,7 @@ class HomeFragment : Fragment() {
     // Snapshot listener registration
     private var scheduleUpcomingSnapshotListener : ListenerRegistration? = null
     private var scheduleTodaySnapshotListener : ListenerRegistration? = null
-
+    private lateinit var userID: String
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -45,7 +47,7 @@ class HomeFragment : Fragment() {
         val firestore = FirebaseFirestore.getInstance()
         scheduleCollection = firestore.collection("Schedule")
         recordCollection = firestore.collection("Record")
-
+        userID = Firebase.auth.currentUser?.uid ?: ""
         // Set up RecyclerView for "Today" pane
         val todayRecyclerView = rootView.findViewById<RecyclerView>(R.id.today_recycler_view)
         todayTasks = ArrayList()
@@ -92,6 +94,7 @@ class HomeFragment : Fragment() {
         scheduleTodaySnapshotListener?.remove() // Remove previous listener if exists
 
         scheduleTodaySnapshotListener = scheduleCollection
+            .whereEqualTo("userID", userID) // Filter tasks by user ID
             .whereEqualTo("date", formattedDate)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
@@ -119,6 +122,7 @@ class HomeFragment : Fragment() {
         scheduleUpcomingSnapshotListener?.remove() // Remove previous listener if exists
 
         scheduleUpcomingSnapshotListener = scheduleCollection
+            .whereEqualTo("userID", userID) // Filter tasks by user ID
             .whereGreaterThan("date", endOfDay) // Filter tasks after today
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {

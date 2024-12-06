@@ -15,6 +15,8 @@ import com.example.furmate.adapter.TaskAdapter
 import com.example.furmate.db.TaskRepositoryAPI
 import com.example.furmate.models.Task
 import com.example.furmate.utils.MarginItemDecoration
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
@@ -98,8 +100,9 @@ class CalendarFragment : Fragment() {
 
         // Remove previous listener if it exists
         snapshotListenerRegistration?.remove()
-
+        val userID = Firebase.auth.currentUser?.uid ?: ""
         snapshotListenerRegistration = scheduleCollection
+            .whereEqualTo("userID", userID) // Filter tasks by user ID
             .whereEqualTo("date", date)
             .addSnapshotListener { snapshots, error ->
                 if (error != null) {
