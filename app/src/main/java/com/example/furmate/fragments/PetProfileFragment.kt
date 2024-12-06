@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -17,6 +18,7 @@ import com.example.furmate.PetRecordFragment
 import com.example.furmate.PetScheduleFragment
 import com.example.furmate.R
 import com.example.furmate.db.PetRepositoryAPI
+import com.example.furmate.utils.ImageLoader
 import com.example.furmate.viewmodels.PetViewModel
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
@@ -83,6 +85,12 @@ class PetProfileFragment : Fragment() {
                     parentFragmentManager.setFragmentResult(PET_NAME_KEY, resultBundle)
                     petNameTextView.text = pet.name
                     (requireActivity() as? HomeActivity)?.changeToolbarTitle(pet.name + "'s Profile")
+
+                    val petImageView = view.findViewById<ImageView>(R.id.imageView)
+                    pet.image?.let {
+                        petImageView.setImageBitmap(ImageLoader.fromBlobScaled(it, 150, 150))
+                    }
+
                 } else {
                     petNameTextView.text = "Pet not found"
                 }

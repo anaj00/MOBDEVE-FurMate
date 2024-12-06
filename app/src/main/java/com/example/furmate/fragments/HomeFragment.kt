@@ -131,7 +131,16 @@ class HomeFragment : Fragment() {
                 }
 
                 if (snapshot != null && !snapshot.isEmpty) {
-                    val tasks = snapshot.documents.mapNotNull { it.toObject(Task::class.java) }
+                    val tasks = snapshot.documents.mapNotNull {
+                        Task(
+                            id=it.getString("id") ?: "",
+                            name=it.getString("name") ?: "",
+                            date=it.getString("date") ?: "",
+                            petName=it.getString("petName") ?: "",
+                            notes=it.getString("notes") ?: "",
+                            userID=it.getString("userID") ?:""
+                        )
+                    }
                     upcomingTasks.clear()
                     upcomingTasks.addAll(tasks)
                     upcomingRecyclerView.adapter?.notifyDataSetChanged()
