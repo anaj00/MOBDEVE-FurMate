@@ -14,14 +14,15 @@
         android:background="@drawable/curved_background"
         android:padding="16dp">
 
-        <ImageView
+        <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/task_icon"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:src="@android:drawable/btn_star_big_off"
+            android:src="@drawable/paw"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:shapeAppearanceOverlay="@style/CircularShape"/>
 
         <!-- Main Text (e.g., Task Name) -->
         <TextView
