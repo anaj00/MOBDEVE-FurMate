@@ -64,5 +64,30 @@ class TaskRepositoryAPI (private val collection: CollectionReference) {
                 callback(false, exception) // Query failed
             }
     }
+
+
+    fun deleteTask(documentId: String, callback: (Boolean, Exception?) -> Unit) {
+        collection.whereEqualTo("id", documentId)
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                if (!querySnapshot.isEmpty) {
+                    for (document in querySnapshot.documents) {
+                        collection.document(document.id)
+                            .delete()
+                            .addOnSuccessListener {
+                                callback(true, null) // Delete succeeded
+                            }
+                            .addOnFailureListener { exception ->
+                                callback(false, exception) // Delete failed
+                            }
+                    }
+                } else {
+                    callback(false, Exception("No document found with id = $documentId"))
+                }
+            }
+            .addOnFailureListener { exception ->
+                callback(false, exception) // Query failed
+            }
+    }
 }
 

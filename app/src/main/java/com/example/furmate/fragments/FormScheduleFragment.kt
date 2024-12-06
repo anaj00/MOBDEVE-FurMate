@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.Spinner
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.children
@@ -51,6 +52,7 @@ class FormScheduleFragment() : Fragment() {
     private var documentId: String? = null
 
     private lateinit var submitButton: Button
+    private lateinit var deleteButton: Button
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var formEntries: ArrayList<String>
@@ -118,6 +120,13 @@ class FormScheduleFragment() : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val rootView = inflater.inflate(R.layout.form_schedule, container, false)
+        val deleteButton = rootView.findViewById<Button>(R.id.cancel_btn)
+
+        if (isEditMode) {
+            deleteButton.visibility = View.VISIBLE  // Show the button in edit mode
+        } else {
+            deleteButton.visibility = View.GONE  // Hide the button when not in edit mode
+        }
 
         recyclerView = rootView.findViewById<RecyclerView>(R.id.input_wrapper)
         recyclerView.layoutManager = LinearLayoutManager(context)
@@ -280,6 +289,33 @@ class FormScheduleFragment() : Fragment() {
             // Update the dropdown with pet options
             adapter.updateDropdownOptions(petOptions, emptyList())  // Update only pets
         })
+
+        deleteButton.setOnClickListener {
+            if (isEditMode && documentId != null) {
+                if (isSchedule!!) {
+                    taskRepositoryAPI.deleteTask(documentId!!) { success, exception ->
+                        if (success) {
+                            Log.d("FormScheduleFragment", "Task successfully deleted")
+                            Toast.makeText(requireContext(), "Task successfully deleted.", Toast.LENGTH_SHORT).show()
+                            requireActivity().onBackPressedDispatcher.onBackPressed()
+                        } else {
+                            Log.e("FormScheduleFragment", "Error deleting task", exception)
+                        }
+                    }
+                } else {
+                    recordRepositoryAPI.deleteRecord(documentId!!) { success, exception ->
+                        if (success) {
+                            Log.d("FormScheduleFragment", "Record successfully deleted")
+                            Toast.makeText(requireContext(), "Record successfully deleted.", Toast.LENGTH_SHORT).show()
+                            requireActivity().onBackPressedDispatcher.onBackPressed()
+                        } else {
+                            Log.e("FormScheduleFragment", "Error deleting record", exception)
+                        }
+                    }
+                }
+            }
+            (requireActivity() as? HomeActivity)?.showFABs()
+        }
 
         return rootView
     }
