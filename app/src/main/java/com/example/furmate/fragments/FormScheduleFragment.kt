@@ -60,12 +60,14 @@ class FormScheduleFragment() : Fragment() {
     private lateinit var recordCollection: CollectionReference
 
     // APIs
+    private lateinit var firestore: FirebaseFirestore
     private lateinit var taskRepositoryAPI: TaskRepositoryAPI
     private lateinit var recordRepositoryAPI: RecordRepositoryAPI
     private lateinit var petRepositoryAPI: PetRepositoryAPI
     private lateinit var bookRepositoryAPI: BookRepositoryAPI
 
     private val formScheduleViewModel: FormScheduleViewModel by activityViewModels()
+
 
     private val hintToFieldMap = mapOf(
         "Title" to "name",
@@ -109,11 +111,6 @@ class FormScheduleFragment() : Fragment() {
         }
 
         isEditMode = documentId != null
-//        Log.d("FormScheduleFragment", "isSchedule: $isSchedule")
-//        Log.d("FormScheduleFragment", "taskTitle: $taskTitle")
-//        Log.d("FormScheduleFragment", "taskDate: $taskDate")
-//        Log.d("FormScheduleFragment", "taskWhere: $taskWhere")
-//        Log.d("FormScheduleFragment", "taskNotes: $taskNotes")
     }
 
     override fun onCreateView(
@@ -127,7 +124,7 @@ class FormScheduleFragment() : Fragment() {
         recyclerView.addItemDecoration(MarginItemDecoration(16))
 
         // Initialize the Firestore instance
-        val firestore = FirebaseFirestore.getInstance()
+        firestore = FirebaseFirestore.getInstance()
         petRepositoryAPI = PetRepositoryAPI(firestore.collection("Pet"))
         bookRepositoryAPI = BookRepositoryAPI(firestore.collection("Book"))
         // Change the header depending on the form type
@@ -185,29 +182,43 @@ class FormScheduleFragment() : Fragment() {
             for (child in recyclerView.children) {
                 val holder = recyclerView.getChildViewHolder(child)
                 val hint = holder.itemView.findViewById<TextInputLayout>(R.id.enter_hint_div).hint.toString()
+                val spinner = holder.itemView.findViewById<Spinner>(R.id.input_field_spinner)
                 val key = hintToFieldMap[hint] ?: hint.lowercase(Locale.getDefault())
 
-                // Safely access the TextInputEditText and check for null
-                val inputField = holder.itemView.findViewById<TextInputEditText>(R.id.input_field)
-
-                // Only proceed if the input field is not null
-                if (inputField != null) {
-                    val value = inputField.text.toString()
-                    Log.d("FormScheduleFragment", "Hint: $hint, FieldName: $key, Value: $value")
-
-                    if (key.isNotEmpty() && value.isNotEmpty()) {
-                        taskData[key] = if (key == "date") {
-                            // Ensure the date is always in a consistent format
-                            val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                            val parsedDate = inputFormat.parse(value)
-                            val outputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                            parsedDate?.let { outputFormat.format(it) } ?: value
+                if (spinner != null) {
+                    // Get the selected item from the spinner
+                    val selectedPet = spinner.selectedItem.toString()
+                    val petCollection = firestore.collection("Pet")
+                    petRepositoryAPI.getPetIDByName(petCollection, selectedPet) { petID, exception ->
+                        if (exception == null && petID != null) {
+                            taskData["petID"] = petID
+                            Log.d("FormScheduleFragment", "Pet ID: $petID")
                         } else {
-                            value
+                            Log.e("FormScheduleFragment", "Failed to get pet ID: $exception")
                         }
                     }
                 } else {
-                    Log.e("FormScheduleFragment", "TextInputEditText is null for field: $key")
+                    // For TextInputEditText fields
+                    val inputField = holder.itemView.findViewById<TextInputEditText>(R.id.input_field)
+
+                    if (inputField != null) {
+                        val value = inputField.text.toString()
+                        Log.d("FormScheduleFragment", "Hint: $hint, FieldName: $key, Value: $value")
+
+                        if (key.isNotEmpty() && value.isNotEmpty()) {
+                            taskData[key] = if (key == "date") {
+                                // Ensure the date is always in a consistent format
+                                val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                                val parsedDate = inputFormat.parse(value)
+                                val outputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                                parsedDate?.let { outputFormat.format(it) } ?: value
+                            } else {
+                                value
+                            }
+                        }
+                    } else {
+                        Log.e("FormScheduleFragment", "TextInputEditText is null for field: $key")
+                    }
                 }
             }
 
@@ -225,14 +236,16 @@ class FormScheduleFragment() : Fragment() {
                         }
                     }
                 }
+                adapter.notifyDataSetChanged()
             } else {
                 Log.d("FormScheduleFragment","isSchedule: $isSchedule")
                 val userID = Firebase.auth.currentUser?.uid ?: ""
+                val defaultDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(System.currentTimeMillis())
                 if (isSchedule!!) {
                     // Add the task to the Firestore database
                     val task = Task(
                         name = taskData["name"] ?: "",
-                        date = taskData["date"] ?: "1970-01-01", // Default date value
+                        date = taskData["date"] ?: defaultDate, // Default date value
                         petName = taskData["petName"] ?: "",
                         notes = taskData["notes"],
                         userID = userID,
@@ -268,11 +281,6 @@ class FormScheduleFragment() : Fragment() {
             adapter.updateDropdownOptions(petOptions, emptyList())  // Update only pets
         })
 
-        formScheduleViewModel.bookOptions.observe(viewLifecycleOwner, Observer { bookOptions ->
-            // Update the dropdown with book options
-            adapter.updateDropdownOptions(emptyList(), bookOptions)  // Update only books
-        })
-
         return rootView
     }
 
@@ -303,16 +311,15 @@ class FormScheduleFragment() : Fragment() {
     private fun loadDropdownData() {
         petRepositoryAPI.getAllPets { pets, exception ->
             if (exception == null && pets != null) {
-                val petOptions = pets.map { it.name }  // Map the list of Pet objects to their names
+                val petOptions = pets.map {
+                    Pair(it.name, it.id)
+                }  // Map the list of Pet objects to their names
                 Log.d("FormScheduleFragment", "Pet Options Loaded: $petOptions")
                 formScheduleViewModel.setPetOptions(petOptions)  // Set pet options in ViewModel
             } else {
                 Log.e("FormScheduleFragment", "Failed to load pet options: $exception")
             }
         }
-
-        // Example for Book options
-        formScheduleViewModel.setBookOptions(listOf("Book 1", "Book 2", "Book 3"))
     }
 
 

@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Spinner
 import androidx.activity.result.ActivityResultLauncher
@@ -16,6 +17,7 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.example.furmate.R
+import com.example.furmate.viewmodels.FormScheduleViewModel
 import com.google.android.material.datepicker.MaterialDatePicker
 import java.text.SimpleDateFormat
 import java.util.*
@@ -29,8 +31,9 @@ class ComposableInputAdapter(
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val inputState = mutableMapOf<Int, Boolean>() // Track input enabled/disabled state
-    private var petOptions: List<String> = listOf() // Default pet options
+    private var petOptions: List<Pair<String, String?>> = listOf() // Default pet options
     private var bookOptions: List<String> = listOf() // Default book options
+    private val formScheduleViewModel = FormScheduleViewModel()
 
     companion object {
         const val TYPE_TEXT_INPUT = 0
@@ -123,8 +126,7 @@ class ComposableInputAdapter(
 
                 // Define different sets of options based on the field (hint)
                 val options: List<String> = when (hint) {
-                    "Pet" -> petOptions // Use the pet options
-                    "Book" -> bookOptions // Use the book options
+                    "Pet" -> petOptions.map { it.first} // Use the pet options
                     else -> listOf("Option 1", "Option 2", "Option 3") // Default options
                 }
 
@@ -149,6 +151,22 @@ class ComposableInputAdapter(
                 }
 
                 toggleInput(holder.spinner, inputState[position] ?: true)
+                holder.spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                    override fun onItemSelected(parent: AdapterView<*>, view: View?, selectedPosition: Int, id: Long) {
+                        // Get the selected pet from petOptions (Pair of petName and petID)
+                        val selectedPet = petOptions.getOrNull(selectedPosition) // Get the Pair based on selected position
+                        val selectedPetID = selectedPet?.second // petID (second part of the Pair)
+
+                        Log.d("ComposableInputAdapter", "Selected Pet ID: $selectedPetID")
+                        selectedPetID?.let {
+                            formScheduleViewModel.setSelectedPetID(it)  // Update ViewModel with selected petID
+                        }
+                    }
+
+                    override fun onNothingSelected(parent: AdapterView<*>) {
+                        // No action needed when nothing is selected
+                    }
+                }
             }
         }
     }
@@ -197,7 +215,7 @@ class ComposableInputAdapter(
         view.alpha = if (isEnabled) 1.0f else 0.5f
     }
 
-    fun updateDropdownOptions(petOptions: List<String>, bookOptions: List<String>) {
+    fun updateDropdownOptions(petOptions: List<Pair<String, String?>>, bookOptions: List<String>) {
         this.petOptions = petOptions
         this.bookOptions = bookOptions
         Log.d("ComposableInputAdapter", "Pet options: $petOptions")

@@ -49,6 +49,21 @@ class PetRepositoryAPI (private val collection: CollectionReference) {
             }
     }
 
+    fun getPetIDByName(collection: CollectionReference, petName: String, callback: (String?, Exception?) -> Unit) {
+        collection
+            .whereEqualTo("name", petName)
+            .get()
+            .addOnSuccessListener { result ->
+                val document = result.documents.firstOrNull()
+
+            callback(document?.id, null)
+            }
+            .addOnFailureListener() { e ->
+                callback(null, e)
+            }
+    }
+
+
     fun getPetByID(collection: CollectionReference, petId: String, callback: (Pet?, Exception?) -> Unit) {
         collection
             .whereEqualTo("id", petId)
