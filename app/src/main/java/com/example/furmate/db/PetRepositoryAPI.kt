@@ -89,4 +89,20 @@ class PetRepositoryAPI (private val collection: CollectionReference) {
                 completion(false, e.message)
             }
     }
+
+    fun deletePet(petID: String, completion: (Boolean, String?) -> Unit) {
+        // Reference to the document with the given petID
+        val petRef = collection.document(petID)
+
+        // Delete the pet from Firestore
+        petRef.delete()
+            .addOnSuccessListener {
+                // On successful deletion, invoke the completion handler with success
+                completion(true, null)
+            }
+            .addOnFailureListener { e ->
+                // On failure, invoke the completion handler with error message
+                completion(false, e.message)
+            }
+    }
 }

@@ -1,10 +1,12 @@
 package com.example.furmate
 
+import PetsFragment
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
 import androidx.core.content.ContextCompat
@@ -33,6 +35,7 @@ class PetProfileHomeFragment : Fragment() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var editButton: ImageButton
+    private lateinit var deleteButton: Button
     private lateinit var adapter: ComposableInputAdapter // Adapter instance for toggling inputs
 
     // Firestore Collections
@@ -145,6 +148,26 @@ class PetProfileHomeFragment : Fragment() {
                     adapter.notifyDataSetChanged()
                 }
             }
+        }
+
+        deleteButton = rootView.findViewById(R.id.submit_btn)
+        deleteButton.setOnClickListener {
+            val petID = arguments?.getString(ARG_PET_ID)
+            if (petID != null) {
+                petRepositoryAPI.deletePet(petID) { success, error ->
+                    if (success) {
+                        Log.d("PetProfileHomeFragment", "Pet deleted successfully.")
+                    } else {
+                        Log.e("PetProfileHomeFragment", "Failed to delete pet: $error")
+                    }
+                }
+            }
+            adapter.notifyDataSetChanged()
+            val petListFragment = PetsFragment()
+
+            val fragmentTransaction = parentFragmentManager.beginTransaction()
+            fragmentTransaction.replace(R.id.fragment_container, petListFragment) // Replace current fragment with PetListFragment
+            fragmentTransaction.commit()
         }
 
         return rootView
