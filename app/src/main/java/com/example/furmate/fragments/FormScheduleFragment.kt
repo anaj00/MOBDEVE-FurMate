@@ -159,7 +159,7 @@ class FormScheduleFragment() : Fragment() {
         val composableInputs = if (isSchedule!!) {
             listOf("Title", "Date", "Pet", "Notes")
         } else {
-            listOf("Title", "Pet", "Image", "Notes")
+            listOf("Title", "Pet", "Notes")
         }
 
         // Pre-fill the fields if task data exists
@@ -255,6 +255,7 @@ class FormScheduleFragment() : Fragment() {
                         }
                     } else {
                         val updatedRecord = taskData.mapValues { it.value as Any }
+
                         documentId?.let { id ->
                             recordRepositoryAPI.updateRecord(id, updatedRecord) { success, exception ->
                                 if (success) {
