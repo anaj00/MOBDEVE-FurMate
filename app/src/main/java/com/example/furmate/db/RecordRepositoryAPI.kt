@@ -22,18 +22,22 @@ class RecordRepositoryAPI(private val collection: CollectionReference) {
             }
     }
 
-    fun getRecordsByBookID(bookID: String, callback: (List<Record>?, Exception?) -> Unit) {
+    fun getAllRecordsByPetID(petID: String, callback: (List<Record>?, Exception?) -> Unit) {
+        Log.d("PetRecordFragment", "Fetching records for pet with ID: $petID")
         collection
-            .whereEqualTo("bookID", bookID)
+            .whereEqualTo("petName", petID)
             .get()
             .addOnSuccessListener { querySnapshot ->
                 val records = querySnapshot.toObjects(Record::class.java)
+                Log.d("PetRecordFragment", "Records: $records")
                 callback(records, null) // Pass records to callback
             }
             .addOnFailureListener { exception ->
+                Log.d("PetRecordFragment", "Exception: $exception")
                 callback(null, exception) // Pass exception to callback
             }
     }
+
 
     fun updateRecord(documentId: String, updatedData: Map<String, Any>, callback: (Boolean, Exception?) -> Unit) {
         collection.whereEqualTo("id", documentId) //

@@ -10,4 +10,15 @@ data class Record (
     var imageURI: String? =null,
     var image:  Blob? = null,
     var userID: String,
-)
+) {
+    // No-argument constructor required for Firestore deserialization
+    constructor() : this(
+        id = null,
+        name = "",
+        petName = "",
+        notes = "",
+        imageURI = null,
+        image = null,
+        userID = ""
+    )
+}
