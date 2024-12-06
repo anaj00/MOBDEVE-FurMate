@@ -1,47 +1,50 @@
 package com.example.furmate.adapter
 
 import android.app.Activity.RESULT_OK
-import android.app.DatePickerDialog
-import android.app.TimePickerDialog
 import android.content.Context
 import android.content.Intent
-import android.graphics.BitmapFactory
-import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.result.ActivityResult
+import android.widget.ArrayAdapter
+import android.widget.Spinner
 import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import androidx.recyclerview.widget.RecyclerView
-import com.example.furmate.HomeActivity
 import com.example.furmate.R
 import com.google.android.material.datepicker.MaterialDatePicker
-import com.google.android.material.timepicker.MaterialTimePicker
-import com.google.android.material.timepicker.TimeFormat
-import com.squareup.picasso.Picasso
 import java.text.SimpleDateFormat
 import java.util.*
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 
 class ComposableInputAdapter(
     private val hints: List<String>,
     private val prefilledValues: List<String>,
     private val context: Context,
     private val filePickerLauncher: ActivityResultLauncher<Intent>? = null
-) : RecyclerView.Adapter<ComposableInputAdapter.InputViewHolder>() {
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val inputState = mutableMapOf<Int, Boolean>() // Track input enabled/disabled state
 
-    class InputViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    companion object {
+        const val TYPE_TEXT_INPUT = 0
+        const val TYPE_DROPDOWN = 1
+        const val REQUEST_FILE_PICKER = 1001
+    }
+
+    // View holder for regular text input
+    class TextInputViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val inputLayout: TextInputLayout = itemView.findViewById(R.id.enter_hint_div)
         val inputText: TextInputEditText = itemView.findViewById(R.id.input_field)
+    }
+
+    // View holder for dropdown (spinner) input
+    class DropdownViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val inputLayout: TextInputLayout = itemView.findViewById(R.id.enter_hint_div)
+        val spinner: Spinner = itemView.findViewById(R.id.input_field_spinner)
     }
 
     init {
@@ -51,52 +54,87 @@ class ComposableInputAdapter(
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): InputViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.composable_input, parent, false)
-        return InputViewHolder(view)
+    override fun getItemViewType(position: Int): Int {
+        // Determine if we should use a dropdown or text input based on the hint
+        return if (hints[position] == "Pet" || hints[position] == "Book") {
+            TYPE_DROPDOWN
+        } else {
+            TYPE_TEXT_INPUT
+        }
     }
 
-    override fun onBindViewHolder(holder: InputViewHolder, position: Int) {
-        val hint = hints[position]
-        holder.inputLayout.hint = hint
-
-        Log.d("ComposableInputAdapter", "Binding item at position: $position, hint: $hint")
-
-        if (prefilledValues[position].isNotEmpty()) {
-            holder.inputText.setText(prefilledValues[position])
-        }
-
-        // Apply the enabled/disabled state to the input field
-        toggleInput(holder, inputState[position] ?: true)
-
-        // Handle specific input types based on the hint
-        when (hint) {
-            "Birthday", "Date" -> {
-                holder.inputText.inputType = android.text.InputType.TYPE_NULL
-                holder.inputText.setOnClickListener {
-                    showDatePicker(holder.inputText)
-                }
-            }
-            "File", "Image", "Profile Picture" -> {
-                holder.inputLayout.endIconMode = TextInputLayout.END_ICON_CUSTOM
-                holder.inputLayout.setEndIconDrawable(android.R.drawable.ic_menu_gallery)
-
-                // Handle click on the end icon
-                holder.inputLayout.setEndIconOnClickListener {
-                    openFileChooser(holder.inputText)
-                }
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        return when (viewType) {
+            TYPE_DROPDOWN -> {
+                val view = LayoutInflater.from(parent.context)
+                    .inflate(R.layout.composable_input_dropdown, parent, false)
+                DropdownViewHolder(view)
             }
             else -> {
-                // Default behavior for other fields (like "Name")
-                holder.inputText.inputType = android.text.InputType.TYPE_CLASS_TEXT // Ensure it's set as text
-                holder.inputText.isEnabled = true  // Ensure the field is enabled
+                val view = LayoutInflater.from(parent.context)
+                    .inflate(R.layout.composable_input, parent, false)
+                TextInputViewHolder(view)
             }
         }
-
-        Log.d("ComposableInputAdapter", "onBindViewHolder: $hint")
     }
 
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        val hint = hints[position]
+        val prefilledValue = prefilledValues[position]
+
+        // Set the hint text and populate the input field
+        when (holder) {
+            is TextInputViewHolder -> {
+                holder.inputLayout.hint = hint
+                if (prefilledValue.isNotEmpty()) {
+                    holder.inputText.setText(prefilledValue)
+                }
+                toggleInput(holder.inputText, inputState[position] ?: true)
+
+                // Handle specific input types like DatePicker for "Birthday" and "Date"
+                if (hint == "Birthday" || hint == "Date") {
+                    holder.inputText.inputType = android.text.InputType.TYPE_NULL
+                    holder.inputText.setOnClickListener {
+                        showDatePicker(holder.inputText)
+                    }
+                } else {
+                    holder.inputText.inputType = android.text.InputType.TYPE_CLASS_TEXT
+                }
+            }
+            is DropdownViewHolder -> {
+                holder.inputLayout.hint = hint
+
+                // Define different sets of options based on the field (hint)
+                val options: List<String> = when (hint) {
+                    "Pet" -> listOf("Pet", "Booboo", "Bird", "Rabbit") // TODO: Add the options
+                    "Book" -> listOf("Book", "Non-fiction", "Science Fiction", "Fantasy") // TODO: Add the options
+                    else -> listOf("Option 1", "Option 2", "Option 3") // Default options
+                }
+
+                // Set up the spinner with the appropriate options
+                val spinnerAdapter = ArrayAdapter<String>(
+                    context,
+                    android.R.layout.simple_spinner_item,
+                    options
+                )
+
+                spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                holder.spinner.adapter = spinnerAdapter
+
+                // Set previously selected value, if any
+                // If the prefilled value doesn't match any of the options, select the first option.
+                val selectedPosition = spinnerAdapter.getPosition(prefilledValue)
+                if (selectedPosition >= 0) {
+                    holder.spinner.setSelection(selectedPosition)
+                } else {
+                    // Set a default selection if prefilledValue is empty or invalid
+                    holder.spinner.setSelection(0) // Select the first option by default
+                }
+
+                toggleInput(holder.spinner, inputState[position] ?: true)
+            }
+        }
+    }
 
     private fun openFileChooser(inputField: TextInputEditText) {
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
@@ -137,14 +175,8 @@ class ComposableInputAdapter(
         }
     }
 
-    fun toggleInput(holder: InputViewHolder, isEnabled: Boolean) {
-        holder.inputText.isEnabled = isEnabled
-        holder.inputLayout.isEnabled = isEnabled
-        holder.inputText.alpha = if (isEnabled) 1.0f else 0.5f // Adjust opacity to reflect state
-    }
-
-
-    companion object {
-        const val REQUEST_FILE_PICKER = 1001
+    private fun toggleInput(view: View, isEnabled: Boolean) {
+        view.isEnabled = isEnabled
+        view.alpha = if (isEnabled) 1.0f else 0.5f
     }
 }
