@@ -24,14 +24,16 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-            <ImageView
+            <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/pet_icon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@android:drawable/btn_star_big_off"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:scaleType="centerInside"
+                android:src="@drawable/paw"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                app:shapeAppearanceOverlay="@style/CircularShape" />
 
             <TextView
                 android:id="@+id/pet_name"
