@@ -5,14 +5,20 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.ImageButton
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.furmate.adapter.ComposableInputAdapter
 import com.example.furmate.db.PetRepositoryAPI
+import com.example.furmate.models.Pet
 import com.example.furmate.utils.MarginItemDecoration
+import com.example.furmate.viewmodels.PetViewModel
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlin.math.log
@@ -32,6 +38,10 @@ class PetProfileHomeFragment : Fragment() {
     // Firestore Collections
     private lateinit var petRepositoryAPI: PetRepositoryAPI
     private lateinit var petCollection: CollectionReference
+
+    private lateinit var inputValues: MutableList<String> // Store input values
+    private lateinit var composableInputs: List<String> // Store labels for input field
+    val petViewModel: PetViewModel by activityViewModels()
     companion object {
         private const val ARG_PET_ID = "pet_id"
         fun newInstance(petID: String): PetProfileHomeFragment {
@@ -86,6 +96,55 @@ class PetProfileHomeFragment : Fragment() {
                     if (areInputsEnabled) R.drawable.success else R.drawable.edit
                 )
             )
+            if (!areInputsEnabled) {
+                // Extract values from the input fields in the RecyclerView
+                for (i in 0 until recyclerView.childCount) {
+                    val viewHolder = recyclerView.findViewHolderForAdapterPosition(i)
+                    val inputField = viewHolder?.itemView?.findViewById<EditText>(R.id.input_field)
+
+                    // Update the inputValues list with the text from each field
+                    inputField?.let {
+                        inputValues[i] = it.text.toString()
+                    }
+                }
+
+                // Now update the Firestore database with the new values
+                val petID = arguments?.getString(ARG_PET_ID)
+                if (petID != null) {
+                    val petData = mutableMapOf<String, Any>()
+                    val userID = Firebase.auth.currentUser?.uid ?: ""
+                    petData["name"] = inputValues[0]
+                    petData["breed"] = inputValues[1]
+                    petData["sex"] = inputValues[2]
+                    petData["birthday"] = inputValues[3]
+                    petData["weight"] = inputValues[4]
+                    petData["notes"] = inputValues[5]
+                    petData["userID"] = userID
+                    petData["id"] = petID
+
+                    // Call the API to update the pet data in Firestore
+                    petRepositoryAPI.updatePetData(petID, petData) { success, error ->
+                        if (success) {
+                            Log.d("PetProfileHomeFragment", "Pet data updated successfully.")
+                        } else {
+                            Log.e("PetProfileHomeFragment", "Failed to update pet data: $error")
+                        }
+                    }
+                    val updatedPet = Pet(
+                        name = inputValues[0],   // Pet's name
+                        breed = inputValues[1],  // Pet's breed
+                        sex = inputValues[2],    // Pet's sex
+                        birthday = inputValues[3], // Pet's birthday
+                        weight = inputValues[4], // Pet's weight
+                        notes = inputValues[5],  // Pet's notes
+                        userID = userID,         // User ID
+                        id = petID               // Pet ID
+                    )
+                    petViewModel.updatePet(updatedPet)
+                    // Refresh the RecyclerView by notifying the adapter
+                    adapter.notifyDataSetChanged()
+                }
+            }
         }
 
         return rootView
@@ -109,8 +168,8 @@ class PetProfileHomeFragment : Fragment() {
                     petWeight = pet.weight
                     petNotes = pet.notes
 
-                    // Once pet data is fetched, update input values
-                    val inputValues = listOf(
+                    // Update the input values list
+                    inputValues = mutableListOf(
                         petName ?: "",
                         petBreed ?: "",
                         petSex ?: "",
@@ -119,10 +178,12 @@ class PetProfileHomeFragment : Fragment() {
                         petNotes ?: ""
                     )
 
-                    // Recreate the adapter with updated data
-                    val composableInputs = listOf("Name", "Breed", "Sex", "Birthday", "Weight", "Notes")
+                    // Labels for input fields
+                    composableInputs = listOf("Name", "Breed", "Sex", "Birthday", "Weight", "Notes")
+
+                    // Set the adapter with updated data
                     adapter = ComposableInputAdapter(composableInputs, inputValues, requireContext())
-                    recyclerView.adapter = adapter // Reset the adapter
+                    recyclerView.adapter = adapter // Set the adapter to RecyclerView
 
                     // Notify the adapter to refresh the data
                     adapter.notifyDataSetChanged()

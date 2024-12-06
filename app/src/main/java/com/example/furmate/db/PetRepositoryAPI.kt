@@ -74,4 +74,19 @@ class PetRepositoryAPI (private val collection: CollectionReference) {
             }
     }
 
+    fun updatePetData(petID: String, petData: Map<String, Any>, completion: (Boolean, String?) -> Unit) {
+        // Reference to the document with the given petID
+        val petRef = collection.document(petID)
+
+        // Update the pet data in Firestore
+        petRef.set(petData)
+            .addOnSuccessListener {
+                // On successful update, invoke the completion handler with success
+                completion(true, null)
+            }
+            .addOnFailureListener { e ->
+                // On failure, invoke the completion handler with error message
+                completion(false, e.message)
+            }
+    }
 }

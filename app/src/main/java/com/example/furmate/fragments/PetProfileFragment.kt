@@ -7,6 +7,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Observer
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.example.furmate.HomeActivity
@@ -15,15 +17,16 @@ import com.example.furmate.PetBookFragment
 import com.example.furmate.PetScheduleFragment
 import com.example.furmate.R
 import com.example.furmate.db.PetRepositoryAPI
+import com.example.furmate.viewmodels.PetViewModel
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.google.firebase.firestore.FirebaseFirestore
 
 class PetProfileFragment : Fragment() {
-
+    val petViewModel: PetViewModel by activityViewModels()
     companion object {
         private const val ARG_PET_ID = "pet_id"
-
+        const val PET_NAME_KEY = "pet_name_key"
         fun newInstance(petId: String): PetProfileFragment {
             val fragment = PetProfileFragment()
             val args = Bundle()
@@ -56,6 +59,14 @@ class PetProfileFragment : Fragment() {
         val viewPager = view.findViewById<ViewPager2>(R.id.view_pager)
         val petNameTextView = view.findViewById<TextView>(R.id.pet_name)
 
+        petViewModel.petData.observe(viewLifecycleOwner, Observer { updatedPet ->
+            updatedPet?.let {
+                // Update the pet name UI
+                petNameTextView.text = it.name
+                // Update the toolbar title as well
+                (requireActivity() as? HomeActivity)?.changeToolbarTitle("${it.name}'s Profile")
+            }
+        })
 
         // Get pet info
         val petId = arguments?.getString(ARG_PET_ID)
@@ -66,6 +77,10 @@ class PetProfileFragment : Fragment() {
                     return@getPetByID
                 } else if (pet != null) {
                     // Populate UI with pet details
+                    val resultBundle = Bundle().apply {
+                        putString(PET_NAME_KEY, pet.name)
+                    }
+                    parentFragmentManager.setFragmentResult(PET_NAME_KEY, resultBundle)
                     petNameTextView.text = pet.name
                     (requireActivity() as? HomeActivity)?.changeToolbarTitle(pet.name + "'s Profile")
                 } else {
